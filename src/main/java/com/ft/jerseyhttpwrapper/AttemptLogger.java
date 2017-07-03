@@ -33,8 +33,10 @@ public class AttemptLogger {
         long timeTakenMillis = (endTime - startMillis);
 
         LOGGER.debug("[ATTEMPT FINISHED] request_uri={}, request_entity={}", attemptUri, entity);
-        LOGGER.info("[ATTEMPT FINISHED] request_uri={}, outcome={}, time_ms={}", attemptUri, outcome, timeTakenMillis);
-
+        int status = Integer.parseInt(outcome);
+        if (status > 499 && status <= 599) {
+            LOGGER.error("[ATTEMPT FINISHED] request_uri={}, outcome={}, time_ms={}", attemptUri, outcome, timeTakenMillis);
+        }
     }
 
 }
