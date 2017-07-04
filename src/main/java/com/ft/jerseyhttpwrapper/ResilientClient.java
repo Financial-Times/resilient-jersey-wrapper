@@ -202,12 +202,10 @@ public class ResilientClient extends Client {
 
 
                     if(currentResponse!=null) {
-                        requestOutcome=Integer.toString(currentResponse.getStatus());
+                        attempt.stop(currentResponse.getStatus());
                     } else if(lastClientHandlerException!=null) {
-                        requestOutcome="Exception";
+                        attempt.stop(0);
                     }
-
-                    attempt.stop(requestOutcome);
                 }
             }
 

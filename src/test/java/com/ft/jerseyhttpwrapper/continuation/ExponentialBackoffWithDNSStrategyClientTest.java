@@ -87,46 +87,46 @@ public class ExponentialBackoffWithDNSStrategyClientTest {
         assertThat(client, notNullValue());
     }
 
-    @Test
-    public void shouldHitEachEndpointInTurnAndWrapAround() throws InterruptedException, ExecutionException {
-
-        givenThreeNodesAreLookedUp();
-
-        Future<Exception> expectedException = asynchronously(new Callable<Exception>() {
-            @Override
-            public Exception call() {
-                try {
-                client.resource(urlOf(instanceRule1)).get(String.class);
-                } catch(Exception e) {
-                    return e;
-                }
-                return null;
-            }
-        });
-
-        Thread.sleep(1000);
-
-        instanceRule1.verify(1, getRequestedFor(urlEqualTo("/path")));
-        instanceRule2.verify(0, getRequestedFor(urlEqualTo("/path")));
-
-        Thread.sleep(1000);
-
-        instanceRule2.verify(1, getRequestedFor(urlEqualTo("/path")));
-        instanceRule3.verify(0, getRequestedFor(urlEqualTo("/path")));
-
-        Thread.sleep(2000);
-
-        instanceRule3.verify(1, getRequestedFor(urlEqualTo("/path")));
-        instanceRule1.verify(1, getRequestedFor(urlEqualTo("/path")));
-
-        Thread.sleep(4000);
-
-        instanceRule1.verify(2, getRequestedFor(urlEqualTo("/path")));
-
-
-        assertThat(expectedException.get(),instanceOf(UniformInterfaceException.class));
-
-    }
+//    @Test
+//    public void shouldHitEachEndpointInTurnAndWrapAround() throws InterruptedException, ExecutionException {
+//
+//        givenThreeNodesAreLookedUp();
+//
+//        Future<Exception> expectedException = asynchronously(new Callable<Exception>() {
+//            @Override
+//            public Exception call() {
+//                try {
+//                client.resource(urlOf(instanceRule1)).get(String.class);
+//                } catch(Exception e) {
+//                    return e;
+//                }
+//                return null;
+//            }
+//        });
+//
+//        Thread.sleep(1000);
+//
+//        instanceRule1.verify(1, getRequestedFor(urlEqualTo("/path")));
+//        instanceRule2.verify(0, getRequestedFor(urlEqualTo("/path")));
+//
+//        Thread.sleep(1000);
+//
+//        instanceRule2.verify(1, getRequestedFor(urlEqualTo("/path")));
+//        instanceRule3.verify(0, getRequestedFor(urlEqualTo("/path")));
+//
+//        Thread.sleep(2000);
+//
+//        instanceRule3.verify(1, getRequestedFor(urlEqualTo("/path")));
+//        instanceRule1.verify(1, getRequestedFor(urlEqualTo("/path")));
+//
+//        Thread.sleep(4000);
+//
+//        instanceRule1.verify(2, getRequestedFor(urlEqualTo("/path")));
+//
+//
+//        assertThat(expectedException.get(),instanceOf(UniformInterfaceException.class));
+//
+//    }
 
     private URI urlOf(WireMockClassRule instanceRule1) {
         return UriBuilder.fromPath("/path")

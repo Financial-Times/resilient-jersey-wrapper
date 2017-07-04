@@ -27,16 +27,24 @@ public class AttemptLogger {
     }
 
 
-    public void stop(String outcome) {
+    public void stop(int status) {
         long endTime = System.currentTimeMillis();
         attemptTimer.stop();
         long timeTakenMillis = (endTime - startMillis);
 
         LOGGER.debug("[ATTEMPT FINISHED] request_uri={}, request_entity={}", attemptUri, entity);
-        int status = Integer.parseInt(outcome);
+
+        String outcome = null;
         if (status > 499 && status <= 599) {
+            outcome = Integer.toString(status);
+        } else if (status == 0) {
+            outcome = "Exception";
+        }
+
+        if (outcome != null) {
             LOGGER.error("[ATTEMPT FINISHED] request_uri={}, outcome={}, time_ms={}", attemptUri, outcome, timeTakenMillis);
         }
     }
+
 
 }
