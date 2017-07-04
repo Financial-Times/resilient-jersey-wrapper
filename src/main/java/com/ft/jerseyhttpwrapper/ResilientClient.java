@@ -144,8 +144,6 @@ public class ResilientClient extends Client {
                 clonedRequest.getHeaders().putSingle("User-Agent", userAgentSupplier.get());
                 
                 maybePropagateTransactionId(clonedRequest);
-                
-                String requestOutcome = "unknown";
 
                 AttemptLogger attempt = attemptLoggerFactory.startTimers(attemptUri, clonedRequest);
 
@@ -214,7 +212,7 @@ public class ResilientClient extends Client {
             attemptCounts.update(attemptCount);
 
             String outcome = "unknown";
-            int status = HttpStatus.SC_OK;
+            int status = 0;
             if(lastResponse!=null) {
                 status = lastResponse.getStatus();
                 outcome = Integer.toString(status);
@@ -222,9 +220,8 @@ public class ResilientClient extends Client {
                 outcome="Exception";
             }
 
-            String finishedMessage = String.format("[REQUEST FINISHED] short_name=%s, outcome=%s, total_attempts=%d, failed_attempts=%d", shortName, outcome, attemptCount, failedAttemptCount);
-
-            if(attemptCount==0 || (status > 399 && status <= 499)) {
+            if(attemptCount == 0 || (status > 499 && status <= 599)) {
+                String finishedMessage = String.format("[REQUEST FINISHED] short_name=%s, outcome=%s, total_attempts=%d, failed_attempts=%d", shortName, outcome, attemptCount, failedAttemptCount);
                 LOGGER.error(finishedMessage);
             }
         }
