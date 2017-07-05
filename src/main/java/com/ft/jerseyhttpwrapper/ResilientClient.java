@@ -19,6 +19,7 @@ import com.google.common.base.Strings;
 import com.google.common.base.Supplier;
 import com.sun.jersey.api.client.ClientHandler;
 import com.sun.jersey.api.client.config.ClientConfig;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,13 +102,7 @@ public class ResilientClient extends Client {
 	  URI requestedUri = originalRequest.getURI();
 	  if ("https".equals(requestedUri.getScheme())) {
 	    // minimal support for https (don't fiddle with hostname) - just pass-through to the default impl
-        LOGGER.info("[REQUEST STARTED] short_name={} uri={}", shortName, requestedUri);
-        try {
           return super.handle(originalRequest);
-        }
-        finally {
-          LOGGER.info("[REQUEST FINISHED] short_name={} uri={}", shortName, requestedUri);
-        }
 	  }
 	  
         Timer.Context requestsTimer = requests.time();
@@ -128,8 +123,6 @@ public class ResilientClient extends Client {
         suppliedAddress = suppliedAddress.withDefaultPort(80);
 
         try {
-			LOGGER.info("[REQUEST STARTED] short_name={}", shortName);
-
             ContinuationSession session = continuationPolicy.startSession(suppliedAddress, provider);
 
             while(session.shouldContinue()) {
@@ -151,8 +144,6 @@ public class ResilientClient extends Client {
                 clonedRequest.getHeaders().putSingle("User-Agent", userAgentSupplier.get());
                 
                 maybePropagateTransactionId(clonedRequest);
-                
-                String requestOutcome = "unknown";
 
                 AttemptLogger attempt = attemptLoggerFactory.startTimers(attemptUri, clonedRequest);
 
@@ -209,12 +200,10 @@ public class ResilientClient extends Client {
 
 
                     if(currentResponse!=null) {
-                        requestOutcome=Integer.toString(currentResponse.getStatus());
+                        attempt.stop(currentResponse.getStatus());
                     } else if(lastClientHandlerException!=null) {
-                        requestOutcome="Exception";
+                        attempt.stop(0);
                     }
-
-                    attempt.stop(requestOutcome);
                 }
             }
 
@@ -223,18 +212,17 @@ public class ResilientClient extends Client {
             attemptCounts.update(attemptCount);
 
             String outcome = "unknown";
+            int status = 0;
             if(lastResponse!=null) {
-                outcome = Integer.toString(lastResponse.getStatus());
+                status = lastResponse.getStatus();
+                outcome = Integer.toString(status);
             } else if(lastClientHandlerException!=null) {
                 outcome="Exception";
             }
 
-            String finishedMessage = String.format("[REQUEST FINISHED] short_name=%s, outcome=%s, total_attempts=%d, failed_attempts=%d", shortName, outcome, attemptCount, failedAttemptCount);
-
-            if(attemptCount==0) {
+            if(attemptCount == 0 || (status > 499 && status <= 599)) {
+                String finishedMessage = String.format("[REQUEST FINISHED] short_name=%s, outcome=%s, total_attempts=%d, failed_attempts=%d", shortName, outcome, attemptCount, failedAttemptCount);
                 LOGGER.error(finishedMessage);
-            } else {
-                LOGGER.info(finishedMessage);
             }
         }
 
