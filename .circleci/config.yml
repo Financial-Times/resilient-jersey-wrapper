@@ -4,6 +4,7 @@ jobs:
     working_directory: ~/resilient-jersey-wrapper
     docker:
       - image: maven
+      - image: java:openjdk-7
     steps:
       - checkout
       - run:
