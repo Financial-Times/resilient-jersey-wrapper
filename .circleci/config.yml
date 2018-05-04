@@ -3,7 +3,6 @@ jobs:
   build:
     working_directory: ~/resilient-jersey-wrapper
     docker:
-      - image: openjdk
       - image: maven
     steps:
       - checkout
