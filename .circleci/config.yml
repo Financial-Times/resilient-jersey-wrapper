@@ -1,0 +1,20 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/resilient-jersey-wrapper
+    docker:
+      - umage: openjdk
+      - image: maven
+    steps:
+      - checkout
+      - run:
+          name: Maven dependency
+          command: mvn dependency:go-offline
+      - run:
+          name: Maven integration Tests
+          command: mvn integration-test
+workflows:
+  version: 2
+  test-and-build:
+    jobs:
+      - build
