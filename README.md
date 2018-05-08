@@ -1,5 +1,7 @@
 # Resilient Client
 
+[![Circle CI](https://circleci.com/gh/Financial-Times/resilient-jersey-wrapper/tree/master.png?style=shield)](https://circleci.com/gh/Financial-Times/resilient-jersey-wrapper/tree/master)
+
 An implementation of the Jersey HTTP client API using the supplied Apache HttpClient implementation libraries.
 
 This client adds the following resilience features to the standard feature set:
