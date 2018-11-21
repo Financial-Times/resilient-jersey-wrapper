@@ -13,6 +13,19 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>Internal Releases</name>
+            <url>https://nexus.in.ft.com/repository/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <uniqueVersion>true</uniqueVersion>
+            <url>https://nexus.in.ft.com/repository/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
