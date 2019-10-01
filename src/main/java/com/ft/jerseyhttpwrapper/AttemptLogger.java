@@ -1,8 +1,9 @@
 package com.ft.jerseyhttpwrapper;
 
 import com.codahale.metrics.Timer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.ft.membership.logging.Operation;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  * AttemptLogger
@@ -11,7 +12,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AttemptLogger {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(AttemptLogger.class);
+//    public static final Logger LOGGER = LoggerFactory.getLogger(AttemptLogger.class);
 
     private final String attemptUri;
     private final Timer.Context attemptTimer;
@@ -32,7 +33,16 @@ public class AttemptLogger {
         attemptTimer.stop();
         long timeTakenMillis = (endTime - startMillis);
 
-        LOGGER.debug("[ATTEMPT FINISHED] request_uri={}, request_entity={}", attemptUri, entity);
+        final Operation operationJson = Operation.operation("stop")
+                .jsonLayout().initiate(this);
+
+        operationJson.logIntermediate()
+                .yielding("attempt_state", "ATTEMPT FINISHED")
+                .yielding("request_uri", attemptUri)
+                .yielding("request_entity", entity)
+                .log();
+
+        // LOGGER.debug("[ATTEMPT FINISHED] request_uri={}, request_entity={}", attemptUri, entity);
 
         String outcome = null;
         if (status > 499 && status <= 599) {
@@ -42,9 +52,15 @@ public class AttemptLogger {
         }
 
         if (outcome != null) {
-            LOGGER.error("[ATTEMPT FINISHED] request_uri={}, outcome={}, time_ms={}", attemptUri, outcome, timeTakenMillis);
+            // LOGGER.error("[ATTEMPT FINISHED] request_uri={}, outcome={}, time_ms={}", attemptUri, outcome, timeTakenMillis);
+
+            operationJson.logIntermediate()
+                    .yielding("attempt_state", "ATTEMPT FINISHED")
+                    .yielding("request_uri", attemptUri)
+                    .yielding("outcome", outcome)
+                    .yielding("time_ms", timeTakenMillis)
+                    .logError();
         }
     }
-
 
 }
