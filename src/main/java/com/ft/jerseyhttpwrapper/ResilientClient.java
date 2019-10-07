@@ -19,11 +19,9 @@ import com.google.common.base.Strings;
 import com.google.common.base.Supplier;
 import com.sun.jersey.api.client.ClientHandler;
 import com.sun.jersey.api.client.config.ClientConfig;
-import org.apache.http.HttpStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ft.jerseyhttpwrapper.providers.HostAndPortProvider;
+import com.ft.membership.logging.Operation;
 import com.google.common.base.Preconditions;
 import com.google.common.net.HostAndPort;
 import com.sun.jersey.api.client.Client;
@@ -40,7 +38,6 @@ public class ResilientClient extends Client {
      */
     public static final String MAVEN_PROPERTIES = "/META-INF/maven/com.ft.resilient-jersey-wrapper/resilient-jersey-wrapper/pom.properties";
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(ResilientClient.class);
     private static final List<Integer> RECOVERABLE_STATUSES = Arrays.asList(500, 503, 504);
     private static final List<String> NON_IDEMPOTENT_METHODS = Arrays.asList("POST", "PATCH");
     
@@ -122,6 +119,9 @@ public class ResilientClient extends Client {
         // fill out the port as port 80 for use in practice
         suppliedAddress = suppliedAddress.withDefaultPort(80);
 
+        final Operation operationJson = Operation.operation("handle")
+				.jsonLayout().initiate(this);
+
         try {
             ContinuationSession session = continuationPolicy.startSession(suppliedAddress, provider);
 
@@ -129,13 +129,13 @@ public class ResilientClient extends Client {
 
                 HostAndPort hostAndPort = session.nextHost();
 
-                if(Strings.isNullOrEmpty(hostAndPort.getHostText())) {
+                if(Strings.isNullOrEmpty(hostAndPort.getHost())) {
                     // never been thrown, but helpful in proving/falsifying some theories in the debugger. SJG Jan 2015
                     throw new IllegalStateException("ContinuationSession produced null or empty endpoint host");
                 }
 
                 URI attemptUri = UriBuilder.fromUri(requestedUri)
-                        .host(hostAndPort.getHostText())
+                        .host(hostAndPort.getHost())
                         .port(hostAndPort.getPortOrDefault(8080))
                         .build();
 
@@ -151,7 +151,9 @@ public class ResilientClient extends Client {
                     try {
                         lastResponse.getEntityInputStream().close();
                     } catch (IOException e) {
-                        LOGGER.warn("Error occurred while trying to prevent connections from staying open. Could not close response stream.", e);
+                        operationJson.wasFailure()
+                        	.withMessage("Error occurred while trying to prevent connections from staying open. Could not close response stream.")
+                        	.logWarn(this);
                     }
                 }
 
@@ -183,17 +185,25 @@ public class ResilientClient extends Client {
                     lastClientHandlerException = e;
 
                     if (cause instanceof IOException) {
-                        LOGGER.warn("Error communicating with server.",e);
-                        session.handleFailedHost(hostAndPort);
+                    	operationJson.logIntermediate()
+                        	.yielding("msg", "Error communicating with server.")
+                        	.logWarn(e);
+                    	session.handleFailedHost(hostAndPort);
 
                         if(isRemoteStateUncertain(cause) && !isIdempotentMethod(originalRequest.getMethod()) && !retryNonIdempotentMethods) {
-                            LOGGER.warn("Not retrying interrupted {}: not idempotent", originalRequest.getMethod());
-                            throw e;
+                        	operationJson.logIntermediate()
+                        		.yielding("msg", "Not retrying interrupted " + originalRequest.getMethod() + " not idempotent")
+                        		.logWarn();
+
+                        	throw e;
                         }
 
                     } else {
-                        LOGGER.warn("Unexpected error communicating with server.", e);
-                        throw e;
+                    	operationJson.logIntermediate()
+                    		.yielding("msg", "Unexpected error communicating with server.")
+                    		.logWarn(e);
+                        
+                    	throw e;
                     }
 
                 } finally {
@@ -222,7 +232,9 @@ public class ResilientClient extends Client {
 
             if(attemptCount == 0 || (status > 499 && status <= 599)) {
                 String finishedMessage = String.format("[REQUEST FINISHED] short_name=%s, outcome=%s, total_attempts=%d, failed_attempts=%d", shortName, outcome, attemptCount, failedAttemptCount);
-                LOGGER.error(finishedMessage);
+            	operationJson.logIntermediate()
+        			.yielding("msg", finishedMessage)
+        			.logError();
             }
         }
 

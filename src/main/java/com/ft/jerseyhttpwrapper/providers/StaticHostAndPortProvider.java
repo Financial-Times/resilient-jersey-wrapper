@@ -1,12 +1,12 @@
 package com.ft.jerseyhttpwrapper.providers;
 
-import com.google.common.net.HostAndPort;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.ft.membership.logging.Operation.operation;
 
 import java.net.URI;
-
 import java.util.List;
+
+import com.ft.membership.logging.Operation;
+import com.google.common.net.HostAndPort;
 
 /**
  * StaticHostAndPortProvider
@@ -15,18 +15,20 @@ import java.util.List;
  */
 public abstract class StaticHostAndPortProvider implements HostAndPortProvider {
 
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(StaticHostAndPortProvider.class);
-
     public StaticHostAndPortProvider(List<HostAndPort> hostsAndPorts) {
         this.hostsAndPorts = hostsAndPorts;
     }
     private final List<HostAndPort> hostsAndPorts;
 
-    @Override
-    public void handleFailedHost(HostAndPort hostAndPort) {
-        LOGGER.info("Host - {} failed to respond correctly", hostAndPort.getHostText());
-    }
+	@Override
+	public void handleFailedHost(HostAndPort hostAndPort) {
+		final Operation operationJson = operation("handleFailedHost")
+				.jsonLayout().initiate(this);
+		operationJson.logIntermediate()
+				.yielding("msg",
+						hostAndPort.getHost() + "failed to respond correctly")
+				.logInfo();
+	}
 
     protected List<HostAndPort> getHostNames() {
         return hostsAndPorts;
@@ -42,13 +44,17 @@ public abstract class StaticHostAndPortProvider implements HostAndPortProvider {
 
     public boolean hasHost(HostAndPort someEndpoint) {
         for(HostAndPort hostAndPort : hostsAndPorts) {
-            if(someEndpoint.getHostText().equals(hostAndPort.getHostText())) {
+            if(someEndpoint.getHost().equals(hostAndPort.getHost())) {
                 int candidatesPort = hostAndPort.getPortOrDefault(-1);
                 int someEndpointsPort = someEndpoint.getPortOrDefault(-1);
 
                 // ports are only supported for testing purposes anyway, so be permissive
                 if(candidatesPort<0 || someEndpointsPort <0) {
-                    LOGGER.debug("Using wildcard port");
+            		final Operation operationJson = operation("hasHost")
+            				.jsonLayout().initiate(this);
+            		operationJson.logIntermediate()
+            				.yielding("msg", "Using wildcard port").logDebug();
+
                     return true;
                 }
 

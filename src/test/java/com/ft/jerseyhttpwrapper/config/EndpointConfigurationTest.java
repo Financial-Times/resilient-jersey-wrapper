@@ -2,6 +2,7 @@ package com.ft.jerseyhttpwrapper.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.ft.jerseyhttpwrapper.ResilienceStrategy;
 import com.google.common.base.Optional;
 import io.dropwizard.client.JerseyClientConfiguration;
@@ -22,6 +23,7 @@ public class EndpointConfigurationTest {
 	@Before
 	public void registerGuavaModules() {
 		objectMapper.registerModule(new GuavaModule());
+		objectMapper.registerModule(new Jdk8Module());
 	}
 
 	@Test
@@ -139,7 +141,7 @@ public class EndpointConfigurationTest {
 						Arrays.asList(" host:80:81", "host2:90:91"),
 						Arrays.asList("host3:100:101")
 				);
-
+		
 		final String json = objectMapper.writeValueAsString(endpointConfig);
 		final EndpointConfiguration readEndpointConfig = objectMapper.readValue(json, EndpointConfiguration.class);
 

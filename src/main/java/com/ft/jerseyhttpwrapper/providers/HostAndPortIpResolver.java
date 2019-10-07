@@ -1,8 +1,9 @@
 package com.ft.jerseyhttpwrapper.providers;
 
+import static com.ft.membership.logging.Operation.operation;
+
+import com.ft.membership.logging.Operation;
 import com.google.common.net.HostAndPort;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -15,12 +16,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class HostAndPortIpResolver {
 
-	private final Logger logger = LoggerFactory.getLogger(HostAndPortIpResolver.class);
-
 	private static final int NODES_PER_HOSTNAME_GUESS = 6;
 
 	private final HostToIpMapper hostMapper;
-
+	
 	public HostAndPortIpResolver(HostToIpMapper hostMapper) {
 		this.hostMapper = checkNotNull(hostMapper);
 	}
@@ -34,12 +33,13 @@ public class HostAndPortIpResolver {
 	}
 
 	public List<HostAndPort> resolve(HostAndPort hostAndPort) {
+		final Operation resultOperation = operation("resolve").with("argument", hostAndPort.getHost()).jsonLayout().initiate(this);
 		try {
-			final InetAddress[] inetAddresses = hostMapper.mapToIps(hostAndPort.getHostText());
+			final InetAddress[] inetAddresses = hostMapper.mapToIps(hostAndPort.getHost());
 			return mapAddressesAcrossPorts(hostAndPort, inetAddresses);
 
 		} catch(UnknownHostException e) {
-			logger.warn("Unable to resolve host {}", hostAndPort.getHostText());
+			resultOperation.wasFailure().withMessage("Unable to resolve host"  + hostAndPort.getHost()).logWarn(this);
 			return Collections.singletonList(hostAndPort);
 		}
 
