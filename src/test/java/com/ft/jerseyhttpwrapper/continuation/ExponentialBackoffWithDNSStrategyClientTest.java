@@ -17,7 +17,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -107,23 +106,19 @@ public class ExponentialBackoffWithDNSStrategyClientTest {
         Thread.sleep(1000);
 
         instanceRule1.verify(1, getRequestedFor(urlEqualTo("/path")));
-        instanceRule2.verify(1, getRequestedFor(urlEqualTo("/path")));
 
         Thread.sleep(1000);
 
         instanceRule2.verify(1, getRequestedFor(urlEqualTo("/path")));
-        instanceRule3.verify(0, getRequestedFor(urlEqualTo("/path")));
 
         Thread.sleep(2000);
 
         instanceRule3.verify(1, getRequestedFor(urlEqualTo("/path")));
-        instanceRule1.verify(1, getRequestedFor(urlEqualTo("/path")));
 
         Thread.sleep(4000);
 
         instanceRule1.verify(2, getRequestedFor(urlEqualTo("/path")));
-
-
+        
         assertThat(expectedException.get(),instanceOf(UniformInterfaceException.class));
 
     }
