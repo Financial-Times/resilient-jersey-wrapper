@@ -1,8 +1,7 @@
 package com.ft.jerseyhttpwrapper;
 
 import com.codahale.metrics.Timer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.ft.membership.logging.Operation;
 
 /**
  * AttemptLogger
@@ -10,8 +9,6 @@ import org.slf4j.LoggerFactory;
  * @author Simon.Gibbs
  */
 public class AttemptLogger {
-
-    public static final Logger LOGGER = LoggerFactory.getLogger(AttemptLogger.class);
 
     private final String attemptUri;
     private final Timer.Context attemptTimer;
@@ -32,7 +29,14 @@ public class AttemptLogger {
         attemptTimer.stop();
         long timeTakenMillis = (endTime - startMillis);
 
-        LOGGER.debug("[ATTEMPT FINISHED] request_uri={}, request_entity={}", attemptUri, entity);
+        final Operation operationJson = Operation.operation("stop")
+                .jsonLayout().initiate(this);
+
+        operationJson.logIntermediate()
+                .yielding("msg", "ATTEMPT FINISHED")
+                .yielding("uri", attemptUri)
+                .yielding("request_entity", entity)
+                .logDebug();
 
         String outcome = null;
         if (status > 499 && status <= 599) {
@@ -42,9 +46,13 @@ public class AttemptLogger {
         }
 
         if (outcome != null) {
-            LOGGER.error("[ATTEMPT FINISHED] request_uri={}, outcome={}, time_ms={}", attemptUri, outcome, timeTakenMillis);
+            operationJson.logIntermediate()
+                    .yielding("msg", "ATTEMPT FINISHED")
+                    .yielding("uri", attemptUri)
+                    .yielding("outcome", outcome)
+                    .yielding("time_ms", timeTakenMillis)
+                    .logError();
         }
     }
-
 
 }

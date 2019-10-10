@@ -2,8 +2,6 @@ package com.ft.jerseyhttpwrapper.config;
 
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
-import io.dropwizard.validation.valuehandling.OptionalValidatedValueUnwrapper;
 import org.hibernate.validator.HibernateValidator;
 
 import javax.validation.Validation;
@@ -45,7 +43,6 @@ public class DummyClientEnvironment implements ClientEnvironment {
 		return Validation
 				.byProvider(HibernateValidator.class)
 				.configure()
-				.addValidatedValueHandler(new OptionalValidatedValueUnwrapper())
 				.buildValidatorFactory()
 				.getValidator();
 	}

@@ -107,7 +107,7 @@ public class ExponentialBackoffWithDNSStrategyClientTest {
         Thread.sleep(1000);
 
         instanceRule1.verify(1, getRequestedFor(urlEqualTo("/path")));
-        instanceRule2.verify(0, getRequestedFor(urlEqualTo("/path")));
+        instanceRule2.verify(1, getRequestedFor(urlEqualTo("/path")));
 
         Thread.sleep(1000);
 

@@ -4,17 +4,49 @@ jobs:
     working_directory: ~/resilient-jersey-wrapper
     docker:
       - image: maven
-      - image: java:openjdk-7
+      - image: java:openjdk-8
     steps:
       - checkout
       - run:
           name: Maven dependency
-          command: mvn dependency:go-offline
+          command: |
+            mkdir /root/.m2/
+            curl -v -o /root/.m2/settings.xml "https://raw.githubusercontent.com/Financial-Times/nexus-settings/master/public-settings.xml"
+            mvn dependency:go-offline
       - run:
           name: Maven integration Tests
-          command: mvn integration-test
+          command: |
+            curl -v -o /root/.m2/settings.xml "https://raw.githubusercontent.com/Financial-Times/nexus-settings/master/public-settings.xml"
+            mvn integration-test
+            rm -rf /root/.m2/*
+  publish-nexus:
+    working_directory: ~/jesilient-jersey-wrapper
+    docker:
+      - image: coco/dropwizardbase-internal:v1.0.3
+    steps:
+      - checkout:
+            path: ~/jesilient-jersey-wrapper
+      - run:
+          name: Publish Tag to Nexus repository
+          command: |
+            mvn versions:set -DnewVersion=${CIRCLE_TAG}
+            mvn versions:commit
+            mvn deploy
+
 workflows:
   version: 2
   test-and-build:
     jobs:
-      - build
+      - build:
+          filters:
+            tags:
+              only: /.*/
+      - publish-nexus:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^\d+\.\d+\.\d+$/
+     

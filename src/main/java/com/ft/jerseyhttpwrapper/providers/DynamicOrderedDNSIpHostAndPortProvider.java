@@ -1,8 +1,7 @@
 package com.ft.jerseyhttpwrapper.providers;
 
+import com.ft.membership.logging.Operation;
 import com.google.common.net.HostAndPort;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 
@@ -14,7 +13,6 @@ import java.util.Iterator;
  */
 public class DynamicOrderedDNSIpHostAndPortProvider implements HostAndPortProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DynamicOrderedDNSIpHostAndPortProvider.class);
     private HostAndPortIpResolver hostAndPortIpResolver;
 
     public DynamicOrderedDNSIpHostAndPortProvider(HostAndPortIpResolver hostAndPortIpResolver) {
@@ -28,7 +26,11 @@ public class DynamicOrderedDNSIpHostAndPortProvider implements HostAndPortProvid
 
     @Override
     public void handleFailedHost(HostAndPort hostAndPort) {
-        LOGGER.info("{} failed to respond correctly", hostAndPort.toString());
+		final Operation operationJson = Operation.operation("handleFailedHost")
+				.jsonLayout().initiate(this);
+        operationJson.logIntermediate()
+        	.yielding("msg", "failed to respond correctly" + hostAndPort.getHost())
+        	.logInfo();
     }
 
     /**
