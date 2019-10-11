@@ -151,9 +151,10 @@ public class ResilientClient extends Client {
                     try {
                         lastResponse.getEntityInputStream().close();
                     } catch (IOException e) {
-                        operationJson.wasFailure()
-                        	.withMessage("Error occurred while trying to prevent connections from staying open. Could not close response stream.")
-                        	.logWarn(this);
+                    	 operationJson.wasFailure()
+                     		.withMessage(e)
+                     		.withDetail("msg", "Error occurred while trying to prevent connections from staying open. Could not close response stream.")
+                     		.logWarn(e);
                     }
                 }
 
@@ -185,15 +186,17 @@ public class ResilientClient extends Client {
                     lastClientHandlerException = e;
 
                     if (cause instanceof IOException) {
-                    	operationJson.logIntermediate()
-                        	.yielding("msg", "Error communicating with server.")
-                        	.logWarn(e);
+                        operationJson.wasFailure()
+                    	.withMessage(e)
+                    	.withDetail("msg", "Error communicating with server.")
+                    	.logWarn(e);
+
                     	session.handleFailedHost(hostAndPort);
 
                         if(isRemoteStateUncertain(cause) && !isIdempotentMethod(originalRequest.getMethod()) && !retryNonIdempotentMethods) {
                         	operationJson.logIntermediate()
                         		.yielding("msg", "Not retrying interrupted " + originalRequest.getMethod() + " not idempotent")
-                        		.logWarn();
+                        		.logWarn(e);
 
                         	throw e;
                         }

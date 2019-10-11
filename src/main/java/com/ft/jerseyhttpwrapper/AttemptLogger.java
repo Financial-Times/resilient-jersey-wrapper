@@ -32,12 +32,6 @@ public class AttemptLogger {
         final Operation operationJson = Operation.operation("stop")
                 .jsonLayout().initiate(this);
 
-        operationJson.logIntermediate()
-                .yielding("msg", "ATTEMPT FINISHED")
-                .yielding("uri", attemptUri)
-                .yielding("request_entity", entity)
-                .logDebug();
-
         String outcome = null;
         if (status > 499 && status <= 599) {
             outcome = Integer.toString(status);
@@ -49,9 +43,17 @@ public class AttemptLogger {
             operationJson.logIntermediate()
                     .yielding("msg", "ATTEMPT FINISHED")
                     .yielding("uri", attemptUri)
+                    .yielding("responsetime", timeTakenMillis)
+                    .yielding("request_entity", entity)
                     .yielding("outcome", outcome)
-                    .yielding("time_ms", timeTakenMillis)
                     .logError();
+        } else {
+        	 operationJson.logIntermediate()
+             	.yielding("msg", "ATTEMPT FINISHED")
+             	.yielding("uri", attemptUri)
+             	.yielding("responsetime", timeTakenMillis)
+             	.yielding("request_entity", entity)
+             	.logDebug();
         }
     }
 
