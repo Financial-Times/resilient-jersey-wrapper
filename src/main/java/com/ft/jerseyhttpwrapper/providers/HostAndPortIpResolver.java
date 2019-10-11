@@ -39,7 +39,7 @@ public class HostAndPortIpResolver {
 			return mapAddressesAcrossPorts(hostAndPort, inetAddresses);
 
 		} catch(UnknownHostException e) {
-			resultOperation.wasFailure().withMessage("Unable to resolve host"  + hostAndPort.getHost()).logWarn(this);
+			resultOperation.logIntermediate().yielding("msg", "Unable to resolve host "  + hostAndPort.getHost()).logWarn();
 			return Collections.singletonList(hostAndPort);
 		}
 
