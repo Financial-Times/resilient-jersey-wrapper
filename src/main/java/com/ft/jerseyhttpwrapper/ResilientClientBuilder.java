@@ -30,7 +30,8 @@ import java.util.concurrent.ExecutorService;
  */
 public class ResilientClientBuilder {
     private static final String DEFAULT_TX_HEADER = "X-Request-Id";
-
+    private static final String EMPTY_STRING = "";
+    
     private HostAndPortProvider primaryProvider;
     private HostAndPortProvider secondaryProvider;
     private List<SimpleEndpointConfiguration> primaryNodes;
@@ -46,6 +47,7 @@ public class ResilientClientBuilder {
     private String shortName;
     private ContinuationPolicy continuationPolicy = new DefaultContinuationPolicy();
     private String txHeader;
+    private String protocol;
     
     public static ResilientClientBuilder in(Environment environment) {
         return new ResilientClientBuilder(new DW07xClientEnvironment(environment));
@@ -141,6 +143,11 @@ public class ResilientClientBuilder {
         return this;
     }
     
+    public ResilientClientBuilder withProtocol(String protocol) {
+    	this.protocol = protocol;
+    	return this;
+    }
+    
 	public ResilientClientBuilder usingAdminPorts() {
 		useAdminPorts = true;
 		return this;
@@ -213,6 +220,7 @@ public class ResilientClientBuilder {
             client.addFilter(new GZIPContentEncodingFilter(jerseyClientConfig.isGzipEnabledForRequests()));
         }
         client.setTransactionHeader(txHeader);
+        client.setProtocol(configuration != null ? configuration.getProtocol() : EMPTY_STRING);
         
         return client;
     }

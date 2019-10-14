@@ -1,8 +1,9 @@
 package com.ft.jerseyhttpwrapper;
 
+import java.net.URI;
+
 import com.codahale.metrics.Timer;
 import com.sun.jersey.api.client.ClientRequest;
-import java.net.URI;
 
 /**
  * AttemptLogger
@@ -22,7 +23,7 @@ public class AttemptLoggerFactory {
     }
 
     public AttemptLogger startTimers(String uri, ClientRequest request) {
-        return new AttemptLogger(attemptsTimer.time(), uri, request.getEntity());
+        return new AttemptLogger(attemptsTimer.time(), uri, request);
     }
 
 }

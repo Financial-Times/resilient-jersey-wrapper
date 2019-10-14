@@ -46,6 +46,8 @@ public class ResilientClient extends Client {
     private String shortName;
 
     private ContinuationPolicy continuationPolicy;
+    
+    private String protocol;
 
     private Supplier<String> userAgentSupplier = new Supplier<String>() {
         @Override
@@ -213,9 +215,9 @@ public class ResilientClient extends Client {
 
 
                     if(currentResponse!=null) {
-                        attempt.stop(currentResponse.getStatus());
+                        attempt.stop(this, currentResponse);
                     } else if(lastClientHandlerException!=null) {
-                        attempt.stop(0);
+                    	attempt.stop(this, currentResponse);
                     }
                 }
             }
@@ -281,12 +283,24 @@ public class ResilientClient extends Client {
     public String getTransactionHeader() {
         return txPropagationHeader;
     }
-    
-    public void setTransactionIdSupplier(Supplier<String> transactionIdSupplier) {
+
+    public Supplier<String> getTxIdSupplier() {
+		return txIdSupplier;
+	}
+
+	public void setTransactionIdSupplier(Supplier<String> transactionIdSupplier) {
         this.txIdSupplier = transactionIdSupplier;
     }
-    
-    private static String _version;
+
+	public String getProtocol() {
+		return protocol;
+	}
+
+	public void setProtocol(String protocol) {
+		this.protocol = protocol;
+	}
+
+	private static String _version;
 
     static {
 
