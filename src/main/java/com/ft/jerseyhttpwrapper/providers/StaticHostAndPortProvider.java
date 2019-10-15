@@ -26,7 +26,7 @@ public abstract class StaticHostAndPortProvider implements HostAndPortProvider {
 				.jsonLayout().initiate(this);
 		operationJson.logIntermediate()
 				.yielding("msg",
-						hostAndPort.getHost() + "failed to respond correctly")
+						hostAndPort.getHost() + " failed to respond correctly")
 				.logInfo();
 	}
 
