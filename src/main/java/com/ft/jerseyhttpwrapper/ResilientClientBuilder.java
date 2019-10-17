@@ -59,7 +59,7 @@ public class ResilientClientBuilder {
     public static ResilientClientBuilder inTesting(HostAndPort endpoint) {
 
         EndpointConfiguration testHost = EndpointConfiguration.forTesting(
-                                                            endpoint.getHost(),
+                                                            endpoint.getHostText(),
                                                             endpoint.getPortOrDefault(8080)
                                                         );
 
@@ -262,7 +262,7 @@ public class ResilientClientBuilder {
         final ObjectMapper objectMapper = environment.createObjectMapper();
 
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        config.getSingletons().add(new JacksonMessageBodyProvider(objectMapper));
+        config.getSingletons().add(new JacksonMessageBodyProvider(objectMapper, environment.getValidator()));
         return config;
     }
 }
