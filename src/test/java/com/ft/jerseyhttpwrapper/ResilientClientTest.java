@@ -90,7 +90,7 @@ public class ResilientClientTest {
         assertThat(response.getStatus(), is(200));
         assertThat(response.getEntity(String.class), is("Hello world"));
         
-        verify(getRequestedFor(urlEqualTo("/something")).withoutHeader(TX_HEADER));
+        wm.verify(getRequestedFor(urlEqualTo("/something")).withoutHeader(TX_HEADER));
     }
 
     @Test
@@ -111,7 +111,7 @@ public class ResilientClientTest {
             assertThat(response.getStatus(), is(200));
             assertThat(response.getEntity(String.class), is("Hello world"));
             
-            verify(getRequestedFor(urlEqualTo("/something"))
+            wm.verify(getRequestedFor(urlEqualTo("/something"))
                     .withHeader(TX_HEADER, equalTo(txId)));
         }
         finally {
@@ -133,7 +133,7 @@ public class ResilientClientTest {
         assertThat(response.getStatus(), is(200));
         assertThat(response.getEntity(String.class), is("Hello world"));
         
-        verify(getRequestedFor(urlEqualTo("/something"))
+        wm.verify(getRequestedFor(urlEqualTo("/something"))
                 .withoutHeader(TX_HEADER));
     }
     
@@ -216,7 +216,7 @@ public class ResilientClientTest {
 
         handleWithBody(POST, "TEST");
 
-        verify(postRequestedFor(urlEqualTo("/something")).withHeader("Content-Length", equalTo("4")));
+        wm.verify(postRequestedFor(urlEqualTo("/something")).withHeader("Content-Length", equalTo("4")));
     }
 
     @Test @Ignore("pending team decision about whether to address this concern")
@@ -225,7 +225,7 @@ public class ResilientClientTest {
 
         resource(builder.build()).header("Transfer-Encoding", "chunked").post(ClientResponse.class, "TEST");
 
-        verify(postRequestedFor(urlEqualTo("/something")).withHeader("Transfer-Encoding", equalTo("chunked")));
+        wm.verify(postRequestedFor(urlEqualTo("/something")).withHeader("Transfer-Encoding", equalTo("chunked")));
     }
 
     @Test(expected = IllegalArgumentException.class)
