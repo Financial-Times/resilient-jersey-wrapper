@@ -26,7 +26,7 @@ public abstract class StaticHostAndPortProvider implements HostAndPortProvider {
 				.jsonLayout().initiate(this);
 		operationJson.logIntermediate()
 				.yielding("msg",
-						hostAndPort.getHost() + " failed to respond correctly")
+						hostAndPort.getHostText() + " failed to respond correctly")
 				.logInfo();
 	}
 
@@ -44,7 +44,7 @@ public abstract class StaticHostAndPortProvider implements HostAndPortProvider {
 
     public boolean hasHost(HostAndPort someEndpoint) {
         for(HostAndPort hostAndPort : hostsAndPorts) {
-            if(someEndpoint.getHost().equals(hostAndPort.getHost())) {
+            if(someEndpoint.getHostText().equals(hostAndPort.getHostText())) {
                 int candidatesPort = hostAndPort.getPortOrDefault(-1);
                 int someEndpointsPort = someEndpoint.getPortOrDefault(-1);
 

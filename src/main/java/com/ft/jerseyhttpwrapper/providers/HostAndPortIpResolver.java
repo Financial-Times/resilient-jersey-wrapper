@@ -33,13 +33,13 @@ public class HostAndPortIpResolver {
 	}
 
 	public List<HostAndPort> resolve(HostAndPort hostAndPort) {
-		final Operation resultOperation = operation("resolve").with("argument", hostAndPort.getHost()).jsonLayout().initiate(this);
+		final Operation resultOperation = operation("resolve").with("argument", hostAndPort.getHostText()).jsonLayout().initiate(this);
 		try {
-			final InetAddress[] inetAddresses = hostMapper.mapToIps(hostAndPort.getHost());
+			final InetAddress[] inetAddresses = hostMapper.mapToIps(hostAndPort.getHostText());
 			return mapAddressesAcrossPorts(hostAndPort, inetAddresses);
 
 		} catch(UnknownHostException e) {
-			resultOperation.logIntermediate().yielding("msg", "Unable to resolve host "  + hostAndPort.getHost()).logWarn();
+			resultOperation.logIntermediate().yielding("msg", "Unable to resolve host "  + hostAndPort.getHostText()).logWarn();
 			return Collections.singletonList(hostAndPort);
 		}
 

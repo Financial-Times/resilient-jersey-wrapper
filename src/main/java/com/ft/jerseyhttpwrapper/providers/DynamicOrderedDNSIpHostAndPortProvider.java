@@ -29,7 +29,7 @@ public class DynamicOrderedDNSIpHostAndPortProvider implements HostAndPortProvid
 		final Operation operationJson = Operation.operation("handleFailedHost")
 				.jsonLayout().initiate(this);
         operationJson.logIntermediate()
-        	.yielding("msg", "failed to respond correctly " + hostAndPort.getHost())
+        	.yielding("msg", "failed to respond correctly " + hostAndPort.getHostText())
         	.logInfo();
     }
 

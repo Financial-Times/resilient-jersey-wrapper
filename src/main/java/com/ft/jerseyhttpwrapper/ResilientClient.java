@@ -131,13 +131,13 @@ public class ResilientClient extends Client {
 
                 HostAndPort hostAndPort = session.nextHost();
 
-                if(Strings.isNullOrEmpty(hostAndPort.getHost())) {
+                if(Strings.isNullOrEmpty(hostAndPort.getHostText())) {
                     // never been thrown, but helpful in proving/falsifying some theories in the debugger. SJG Jan 2015
                     throw new IllegalStateException("ContinuationSession produced null or empty endpoint host");
                 }
 
                 URI attemptUri = UriBuilder.fromUri(requestedUri)
-                        .host(hostAndPort.getHost())
+                        .host(hostAndPort.getHostText())
                         .port(hostAndPort.getPortOrDefault(8080))
                         .build();
 
