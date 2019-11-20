@@ -31,7 +31,7 @@
             <groupId>com.ft.membership</groupId>
             <artifactId>fluent-logging</artifactId>
             <version>3.2.2</version>
-	    	<exclusions>
+            <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-databind</artifactId>
