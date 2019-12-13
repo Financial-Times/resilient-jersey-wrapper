@@ -285,22 +285,22 @@ public class ResilientClient extends Client {
     }
 
     public Supplier<String> getTxIdSupplier() {
-		return txIdSupplier;
-	}
+	return txIdSupplier;
+    }
 
-	public void setTransactionIdSupplier(Supplier<String> transactionIdSupplier) {
+    public void setTransactionIdSupplier(Supplier<String> transactionIdSupplier) {
         this.txIdSupplier = transactionIdSupplier;
     }
 
-	public String getProtocol() {
-		return protocol;
-	}
+    public String getProtocol() {
+        return protocol;
+    }
 
-	public void setProtocol(String protocol) {
-		this.protocol = protocol;
-	}
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
 
-	private static String _version;
+    private static String _version;
 
     static {
 
