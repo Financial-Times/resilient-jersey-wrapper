@@ -1,5 +1,10 @@
 package com.ft.jerseyhttpwrapper;
 
+import static java.lang.String.valueOf;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import com.codahale.metrics.Timer;
 import com.ft.membership.logging.IntermediateYield;
 import com.ft.membership.logging.Operation;
@@ -44,25 +49,38 @@ public class AttemptLogger {
             outcome = "Exception";
         }
 
-        IntermediateYield yield = operationJson.logIntermediate()
-        		.yielding("msg", "ATTEMPT FINISHED")
-        		.yielding("transaction_id", client.getTxIdSupplier().get())
-        		.yielding("responsetime", timeTakenMillis)
-        		.yielding("protocol", client.getProtocol())
-        		.yielding("uri", attemptUri)
-        		.yielding("path", request.getURI().getPath())
-        		.yielding("method", request.getMethod())
-        		.yielding("status", status)
-        		.yielding("content_type", request.getHeaders().getFirst("Content-Type"))
-        		.yielding("size", responseLength)
-        		.yielding("userAgent", request.getHeaders().get("User-Agent"))
-        		.yielding("exception_was_thrown", (outcome == null)); 
+        IntermediateYield yield = operationJson.logIntermediate();
+
+        withField(yield, "msg", "ATTEMPT FINISHED");
+        withField(yield, "transaction_id", client.getTxIdSupplier().get());
+        withField(yield, "responsetime", timeTakenMillis);
+        withField(yield, "protocol", client.getProtocol());
+        withField(yield, "uri", attemptUri);
+        if (nonNull(request.getURI())) {
+            withField(yield, "path", request.getURI().getPath());
+        }
+        withField(yield, "method", request.getMethod());
+        withField(yield, "status", status);
+        if (nonNull(request.getHeaders())) {
+            withField(yield, "content_type", request.getHeaders().getFirst("Content-Type"));
+            withField(yield, "userAgent", request.getHeaders().get("User-Agent"));
+        }    
+        withField(yield, "size", responseLength);
+        withField(yield, "exception_was_thrown", (outcome != null));
         
         if (outcome != null) {
             yield.logError();
         } else {
-        	yield.logDebug();
+            yield.logDebug();
         }
+    }
+    
+    private void withField(IntermediateYield yield, String key, Object value) {
+        if (isBlank(key) || isNull(value) || isBlank(valueOf(value))) {
+            return;
+        }
+        
+        yield.yielding(key, value);
     }
 
 }
