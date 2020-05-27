@@ -266,9 +266,7 @@ public class ResilientClientBuilder {
     final ObjectMapper objectMapper = environment.createObjectMapper();
 
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    config
-        .getSingletons()
-        .add(new JacksonMessageBodyProvider(objectMapper, environment.getValidator()));
+    config.getSingletons().add(new JacksonMessageBodyProvider(objectMapper));
     return config;
   }
 }

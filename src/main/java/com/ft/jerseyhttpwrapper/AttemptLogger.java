@@ -3,7 +3,6 @@ package com.ft.jerseyhttpwrapper;
 import static java.lang.String.valueOf;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang.StringUtils.isBlank;
 
 import com.codahale.metrics.Timer;
 import com.ft.membership.logging.IntermediateYield;
@@ -73,7 +72,7 @@ public class AttemptLogger {
   }
 
   private void withField(IntermediateYield yield, String key, Object value) {
-    if (isBlank(key) || isNull(value) || isBlank(valueOf(value))) {
+    if (isNull(key) || isNull(value) || isNull(valueOf(value))) {
       return;
     }
 

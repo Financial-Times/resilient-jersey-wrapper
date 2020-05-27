@@ -98,7 +98,7 @@ public class ExponentialBackoffContinuationSessionTest {
     // interrupt the the thread almost immediately
     threadUnderTest.start();
 
-    sleepFor(5);
+    sleepFor(15);
     assertThat(hostsReturned, is(1));
     sleepFor(100);
     assertThat(hostsReturned, is(2));

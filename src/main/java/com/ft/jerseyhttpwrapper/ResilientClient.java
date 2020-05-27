@@ -259,11 +259,14 @@ public class ResilientClient extends Client {
       }
 
       if (attemptCount == 0 || (status > 499 && status <= 599)) {
-        String finishedMessage =
-            String.format(
-                "[REQUEST FINISHED] short_name=%s, outcome=%s, total_attempts=%d, failed_attempts=%d",
-                shortName, outcome, attemptCount, failedAttemptCount);
-        operationJson.logIntermediate().yielding("msg", finishedMessage).logError();
+        operationJson
+            .logIntermediate()
+            .yielding("msg", "[REQUEST FINISHED]")
+            .yielding("short_name", shortName)
+            .yielding("outcome", outcome)
+            .yielding("total_attempts", attemptCount)
+            .yielding("failed_attempts", failedAttemptCount)
+            .logError();
       }
     }
 
