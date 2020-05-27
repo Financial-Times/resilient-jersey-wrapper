@@ -1,17 +1,15 @@
 package com.ft.jerseyhttpwrapper;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
+
 import com.ft.jerseyhttpwrapper.config.EndpointConfiguration;
 import com.google.common.base.Optional;
 import com.google.common.net.HostAndPort;
 import io.dropwizard.client.JerseyClientConfiguration;
-import org.junit.Test;
-
 import java.util.Arrays;
 import java.util.Collections;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 /**
  * ResilientClientBuilderTest
@@ -20,59 +18,50 @@ import static org.junit.Assert.assertTrue;
  */
 public class ResilientClientBuilderTest {
 
-    @Test
-    public void shouldSupportSingletonTestConfiguration() {
+  @Test
+  public void shouldSupportSingletonTestConfiguration() {
 
-        ResilientClient client = ResilientClientBuilder
-                                .inTesting(locally()) // just one node
-                                .build();
+    ResilientClient client =
+        ResilientClientBuilder.inTesting(locally()) // just one node
+            .build();
 
+    assertThat(client, notNullValue());
+  }
 
-        assertThat(client, notNullValue());
-    }
+  @Test
+  public void testShouldAppendAdminToShortNameWhenUsingAdminPorts() {
+    ResilientClient client = ResilientClientBuilder.inTesting(locally()).usingAdminPorts().build();
 
+    assertThat(client.getShortName(), is(equalTo("test-localhost-8080-admin")));
+  }
 
-    @Test
-    public void testShouldAppendAdminToShortNameWhenUsingAdminPorts() {
-        ResilientClient client = ResilientClientBuilder
-                .inTesting(locally())
-                .usingAdminPorts()
-                .build();
+  @Test
+  public void shouldSupportDNSOnlyDynamicConfiguration() {
+    ResilientClient client = ResilientClientBuilder.inTesting().named("test").usingDNS().build();
+    assertThat(client, notNullValue());
+  }
 
-        assertThat(client.getShortName(), is(equalTo("test-localhost-8080-admin")));
-    }
+  @Test(expected = IllegalStateException.class)
+  public void shouldFailIfDNSOnlyDynamicConfigurationIsNotNamed() {
+    ResilientClientBuilder.inTesting().usingDNS().build();
+  }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectNodesIfDynamicStrategySelected() {
+    final JerseyClientConfiguration jerseyClientConfig = new JerseyClientConfiguration();
+    final EndpointConfiguration endpointConfig =
+        new EndpointConfiguration(
+            Optional.<String>absent(),
+            Optional.of(jerseyClientConfig),
+            Optional.<String>absent(),
+            Arrays.asList("host:80:81"),
+            Collections.<String>emptyList());
+    endpointConfig.setResilienceStrategy(ResilienceStrategy.DYNAMIC_RANDOM_IP_STRATEGY);
 
-    @Test
-    public void shouldSupportDNSOnlyDynamicConfiguration() {
-        ResilientClient client = ResilientClientBuilder.inTesting().named("test").usingDNS().build();
-        assertThat(client, notNullValue());
-    }
+    ResilientClientBuilder.inTesting().using(endpointConfig).build();
+  }
 
-    @Test(expected = IllegalStateException.class)
-    public void shouldFailIfDNSOnlyDynamicConfigurationIsNotNamed() {
-        ResilientClientBuilder.inTesting().usingDNS().build();
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void shouldRejectNodesIfDynamicStrategySelected() {
-        final JerseyClientConfiguration jerseyClientConfig = new JerseyClientConfiguration();
-        final EndpointConfiguration endpointConfig = new EndpointConfiguration(
-                Optional.<String>absent(),
-                Optional.of(jerseyClientConfig),
-                Optional.<String>absent(),
-                Arrays.asList("host:80:81"),
-                Collections.<String>emptyList()
-        );
-        endpointConfig.setResilienceStrategy(ResilienceStrategy.DYNAMIC_RANDOM_IP_STRATEGY);
-
-        ResilientClientBuilder.inTesting().using(endpointConfig).build();
-
-    }
-
-
-    private HostAndPort locally() {
-        return HostAndPort.fromString("localhost:8080");
-    }
-
+  private HostAndPort locally() {
+    return HostAndPort.fromString("localhost:8080");
+  }
 }

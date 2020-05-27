@@ -1,16 +1,13 @@
 package com.ft.jerseyhttpwrapper.providers;
 
-import com.ft.jerseyhttpwrapper.providers.RandomHostAndPortProvider;
-import com.ft.jerseyhttpwrapper.providers.SimpleHostAndPortProvider;
-import com.google.common.net.HostAndPort;
-import org.junit.Test;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+import com.google.common.net.HostAndPort;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 /**
  * Ensure configuration is appropriately validated.
@@ -19,60 +16,56 @@ import static org.junit.Assert.assertTrue;
  */
 public class HostAndPortProviderConfigurationTest {
 
-    List<HostAndPort> hostAndPortList = Arrays.asList(HostAndPort.fromParts("host-a.example.com", 80), HostAndPort.fromParts("host-b.example.com", 80));
+  List<HostAndPort> hostAndPortList =
+      Arrays.asList(
+          HostAndPort.fromParts("host-a.example.com", 80),
+          HostAndPort.fromParts("host-b.example.com", 80));
 
-    @Test
-    public void givenAnExactMatchSimpleProviderShouldReportThatItHasAHostAndPortPair() {
+  @Test
+  public void givenAnExactMatchSimpleProviderShouldReportThatItHasAHostAndPortPair() {
 
-        SimpleHostAndPortProvider provider = new SimpleHostAndPortProvider(hostAndPortList);
+    SimpleHostAndPortProvider provider = new SimpleHostAndPortProvider(hostAndPortList);
 
-        assertTrue(provider.hasHost(URI.create("http://host-a.example.com:80/resource?foo=bar")));
+    assertTrue(provider.hasHost(URI.create("http://host-a.example.com:80/resource?foo=bar")));
+  }
 
-    }
+  @Test
+  public void givenAnImplicitMatchSimpleProviderShouldReportThatItHasAHostAndPortPair() {
 
-    @Test
-    public void givenAnImplicitMatchSimpleProviderShouldReportThatItHasAHostAndPortPair() {
+    SimpleHostAndPortProvider provider = new SimpleHostAndPortProvider(hostAndPortList);
 
-        SimpleHostAndPortProvider provider = new SimpleHostAndPortProvider(hostAndPortList);
+    assertTrue(provider.hasHost(URI.create("http://host-a.example.com/resource?foo=bar")));
+  }
 
-        assertTrue(provider.hasHost(URI.create("http://host-a.example.com/resource?foo=bar")));
+  @Test
+  public void givenAnMismatchSimpleProviderShouldReportItDoesNotHaveAHostAndPortPair() {
 
-    }
+    SimpleHostAndPortProvider provider = new SimpleHostAndPortProvider(hostAndPortList);
 
-    @Test
-    public void givenAnMismatchSimpleProviderShouldReportItDoesNotHaveAHostAndPortPair() {
+    assertFalse(provider.hasHost(URI.create("http://anotherservice.com/thing/3")));
+  }
 
-        SimpleHostAndPortProvider provider = new SimpleHostAndPortProvider(hostAndPortList);
+  @Test
+  public void givenAnExactMatchRandomProviderShouldReportThatItSupportsAHostAndPortPair() {
 
-        assertFalse(provider.hasHost(URI.create("http://anotherservice.com/thing/3")));
+    RandomHostAndPortProvider provider = new RandomHostAndPortProvider(hostAndPortList);
 
-    }
+    assertTrue(provider.supports(HostAndPort.fromParts("host-a.example.com", 80)));
+  }
 
-    @Test
-    public void givenAnExactMatchRandomProviderShouldReportThatItSupportsAHostAndPortPair() {
+  @Test
+  public void givenAnImplicitMatchRandomProviderShouldReportThatItSupportsAHostAndPortPair() {
 
-        RandomHostAndPortProvider provider = new RandomHostAndPortProvider(hostAndPortList);
+    RandomHostAndPortProvider provider = new RandomHostAndPortProvider(hostAndPortList);
 
-        assertTrue(provider.supports(HostAndPort.fromParts("host-a.example.com",80)));
+    assertTrue(provider.supports(HostAndPort.fromString("host-a.example.com")));
+  }
 
-    }
+  @Test
+  public void givenAnMismatchRandomProviderShouldReportItDoesNotSupportAHostAndPortPair() {
 
-    @Test
-    public void givenAnImplicitMatchRandomProviderShouldReportThatItSupportsAHostAndPortPair() {
+    RandomHostAndPortProvider provider = new RandomHostAndPortProvider(hostAndPortList);
 
-        RandomHostAndPortProvider provider = new RandomHostAndPortProvider(hostAndPortList);
-
-        assertTrue(provider.supports(HostAndPort.fromString("host-a.example.com")));
-
-    }
-
-    @Test
-    public void givenAnMismatchRandomProviderShouldReportItDoesNotSupportAHostAndPortPair() {
-
-        RandomHostAndPortProvider provider = new RandomHostAndPortProvider(hostAndPortList);
-
-        assertFalse(provider.supports(HostAndPort.fromString("anotherservice.com")));
-
-    }
-
+    assertFalse(provider.supports(HostAndPort.fromString("anotherservice.com")));
+  }
 }

@@ -2,10 +2,8 @@ package com.ft.jerseyhttpwrapper.config;
 
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
-
-import javax.validation.Validator;
 import java.util.concurrent.ExecutorService;
+import javax.validation.Validator;
 
 /**
  * ClientEnvironment
@@ -14,9 +12,11 @@ import java.util.concurrent.ExecutorService;
  */
 public interface ClientEnvironment {
 
-	ObjectMapper createObjectMapper();
-	ExecutorService createExecutorService(String shortName, int minThreads, int maxThreads);
-	Validator getValidator();
+  ObjectMapper createObjectMapper();
 
-	MetricRegistry getMetricsRegistry();
+  ExecutorService createExecutorService(String shortName, int minThreads, int maxThreads);
+
+  Validator getValidator();
+
+  MetricRegistry getMetricsRegistry();
 }
