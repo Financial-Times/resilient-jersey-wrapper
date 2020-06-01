@@ -34,18 +34,15 @@ public class HostAndPortIpResolver {
 
   public List<HostAndPort> resolve(HostAndPort hostAndPort) {
     final Operation resultOperation =
-        operation("resolve")
-            .with("argument", hostAndPort.getHostText())
-            .jsonLayout()
-            .initiate(this);
+        operation("resolve").with("argument", hostAndPort.getHost()).jsonLayout().initiate(this);
     try {
-      final InetAddress[] inetAddresses = hostMapper.mapToIps(hostAndPort.getHostText());
+      final InetAddress[] inetAddresses = hostMapper.mapToIps(hostAndPort.getHost());
       return mapAddressesAcrossPorts(hostAndPort, inetAddresses);
 
     } catch (UnknownHostException e) {
       resultOperation
           .logIntermediate()
-          .yielding("msg", "Unable to resolve host " + hostAndPort.getHostText())
+          .yielding("msg", "Unable to resolve host " + hostAndPort.getHost())
           .logWarn();
       return Collections.singletonList(hostAndPort);
     }

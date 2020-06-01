@@ -142,7 +142,7 @@ public class ResilientClient extends Client {
 
         HostAndPort hostAndPort = session.nextHost();
 
-        if (Strings.isNullOrEmpty(hostAndPort.getHostText())) {
+        if (Strings.isNullOrEmpty(hostAndPort.getHost())) {
           // never been thrown, but helpful in proving/falsifying some theories in the debugger. SJG
           // Jan 2015
           throw new IllegalStateException(
@@ -151,7 +151,7 @@ public class ResilientClient extends Client {
 
         URI attemptUri =
             UriBuilder.fromUri(requestedUri)
-                .host(hostAndPort.getHostText())
+                .host(hostAndPort.getHost())
                 .port(hostAndPort.getPortOrDefault(8080))
                 .build();
 
@@ -259,11 +259,14 @@ public class ResilientClient extends Client {
       }
 
       if (attemptCount == 0 || (status > 499 && status <= 599)) {
-        String finishedMessage =
-            String.format(
-                "[REQUEST FINISHED] short_name=%s, outcome=%s, total_attempts=%d, failed_attempts=%d",
-                shortName, outcome, attemptCount, failedAttemptCount);
-        operationJson.logIntermediate().yielding("msg", finishedMessage).logError();
+        operationJson
+            .logIntermediate()
+            .yielding("msg", "[REQUEST FINISHED]")
+            .yielding("short_name", shortName)
+            .yielding("outcome", outcome)
+            .yielding("total_attempts", attemptCount)
+            .yielding("failed_attempts", failedAttemptCount)
+            .logError();
       }
     }
 
