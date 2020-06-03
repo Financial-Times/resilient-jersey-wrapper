@@ -12,15 +12,12 @@ import static com.ft.jerseyhttpwrapper.config.validation.MultivaluePatternsConst
 import static com.ft.jerseyhttpwrapper.config.validation.MultivaluePatternsConstants.REGEXP_DENIED_X_VARNISH;
 
 import java.util.Set;
-import javax.validation.Validator;
 
 public class DeniedRegexpsValidator {
   private final Set<String> headers;
-  private final Validator validator;
 
-  public DeniedRegexpsValidator(Set<String> headers, Validator validator) {
+  public DeniedRegexpsValidator(Set<String> headers) {
     this.headers = headers;
-    this.validator = validator;
   }
 
   @MultivaluePatterns(
@@ -38,9 +35,5 @@ public class DeniedRegexpsValidator {
       })
   public Set<String> getHeaders() {
     return headers;
-  }
-
-  public Validator getValidator() {
-    return validator;
   }
 }

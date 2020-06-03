@@ -100,10 +100,10 @@ public class AttemptLogger {
 
   private void extractAllowedRequestHeaders(IntermediateYield yield, Validator validator) {
     Map<String, String> requestHeaders = getRequestHeaders();
-    deniedRegexpsValidator = new DeniedRegexpsValidator(requestHeaders.keySet(), validator);
+    deniedRegexpsValidator = new DeniedRegexpsValidator(requestHeaders.keySet());
 
     Set<ConstraintViolation<DeniedRegexpsValidator>> result =
-        deniedRegexpsValidator.getValidator().validate(deniedRegexpsValidator);
+        validator.validate(deniedRegexpsValidator);
 
     Iterator<ConstraintViolation<DeniedRegexpsValidator>> iter = result.iterator();
     Set<String> deniedRequestHeaders = new HashSet<String>();
@@ -127,10 +127,10 @@ public class AttemptLogger {
     if (isNull(responseHeaders)) {
       return;
     }
-    deniedRegexpsValidator = new DeniedRegexpsValidator(responseHeaders.keySet(), validator);
+    deniedRegexpsValidator = new DeniedRegexpsValidator(responseHeaders.keySet());
 
     Set<ConstraintViolation<DeniedRegexpsValidator>> result =
-        deniedRegexpsValidator.getValidator().validate(deniedRegexpsValidator);
+        validator.validate(deniedRegexpsValidator);
 
     Iterator<ConstraintViolation<DeniedRegexpsValidator>> iter = result.iterator();
     List<String> deniedResponseHeaders = new ArrayList<String>();
