@@ -91,13 +91,14 @@ public class ResilientClientNew extends JerseyClient implements Connector {
     this.retryNonIdempotentMethods = retryNonIdempotentMethods;
 
     this.requests =
-        appMetrics.timer(MetricRegistry.name(ResilientClient.class, "requests", shortName));
+        appMetrics.timer(MetricRegistry.name(ResilientClientNew.class, "requests", shortName));
     this.attemptCounts =
-        appMetrics.histogram(MetricRegistry.name(ResilientClient.class, "attemptCount", shortName));
+        appMetrics.histogram(
+            MetricRegistry.name(ResilientClientNew.class, "attemptCount", shortName));
 
     attemptLoggerFactory =
         new AttemptLoggerFactoryNew(
-            appMetrics.timer(MetricRegistry.name(ResilientClient.class, "attempts", shortName)));
+            appMetrics.timer(MetricRegistry.name(ResilientClientNew.class, "attempts", shortName)));
   }
 
   private final HostAndPortProvider provider;
