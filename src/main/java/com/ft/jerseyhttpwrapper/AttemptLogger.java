@@ -80,7 +80,7 @@ public class AttemptLogger {
     if (outcome != null) {
       yield.logError();
     } else {
-      yield.logDebug();
+      yield.logInfo();
     }
   }
 
