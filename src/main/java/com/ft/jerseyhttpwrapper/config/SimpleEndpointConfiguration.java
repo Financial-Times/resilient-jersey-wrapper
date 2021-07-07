@@ -1,7 +1,7 @@
 package com.ft.jerseyhttpwrapper.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Objects.ToStringHelper;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import java.util.Objects;
 
 public class SimpleEndpointConfiguration {
@@ -42,7 +42,7 @@ public class SimpleEndpointConfiguration {
   }
 
   protected ToStringHelper toStringHelper() {
-    return com.google.common.base.Objects.toStringHelper(this)
+    return com.google.common.base.MoreObjects.toStringHelper(this)
         .add("protocol", protocol)
         .add("host", host)
         .add("port", port)

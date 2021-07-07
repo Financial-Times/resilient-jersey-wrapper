@@ -109,7 +109,7 @@ public class DynamicDNSProviderTest {
 
     URI hitUri =
         UriBuilder.fromPath(PATH)
-            .host(endpoint.getHostText())
+            .host(endpoint.getHost())
             .port(endpoint.getPort())
             .scheme("http")
             .build();

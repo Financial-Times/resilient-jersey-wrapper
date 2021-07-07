@@ -9,17 +9,15 @@ import com.ft.jerseyhttpwrapper.continuation.DefaultContinuationPolicy;
 import com.ft.jerseyhttpwrapper.providers.*;
 import com.google.common.base.Preconditions;
 import com.google.common.net.HostAndPort;
-import com.sun.jersey.api.client.filter.GZIPContentEncodingFilter;
-import com.sun.jersey.client.apache4.ApacheHttpClient4Handler;
-import com.sun.jersey.client.apache4.config.ApacheHttpClient4Config;
-import com.sun.jersey.client.apache4.config.DefaultApacheHttpClient4Config;
-import io.dropwizard.client.HttpClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.jersey.jackson.JacksonMessageBodyProvider;
 import io.dropwizard.setup.Environment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.client.filter.EncodingFilter;
+import org.glassfish.jersey.message.GZipEncoder;
 
 /**
  * Convenience for the creation of resilient clients.
@@ -27,7 +25,7 @@ import java.util.concurrent.ExecutorService;
  * @see io.dropwizard.client.JerseyClientBuilder
  * @author Simon.Gibbs
  */
-public class ResilientClientBuilder {
+public class ResilientClientBuilderNew {
   private static final String DEFAULT_TX_HEADER = "X-Request-Id";
   private static final String EMPTY_STRING = "";
 
@@ -49,15 +47,15 @@ public class ResilientClientBuilder {
   private String txHeader;
   private String protocol;
 
-  public static ResilientClientBuilder in(Environment environment) {
-    return new ResilientClientBuilder(new DW07xClientEnvironment(environment));
+  public static ResilientClientBuilderNew in(Environment environment) {
+    return new ResilientClientBuilderNew(new DW20xClientEnvironment(environment));
   }
 
-  public static ResilientClientBuilder in(ClientEnvironment environment) {
-    return new ResilientClientBuilder(environment);
+  public static ResilientClientBuilderNew in(ClientEnvironment environment) {
+    return new ResilientClientBuilderNew(environment);
   }
 
-  public static ResilientClientBuilder inTesting(HostAndPort endpoint) {
+  public static ResilientClientBuilderNew inTesting(HostAndPort endpoint) {
 
     EndpointConfiguration testHost =
         EndpointConfiguration.forTesting(endpoint.getHost(), endpoint.getPortOrDefault(8080));
@@ -65,16 +63,16 @@ public class ResilientClientBuilder {
     return inTesting().using(testHost);
   }
 
-  public static ResilientClientBuilder inTesting() {
+  public static ResilientClientBuilderNew inTesting() {
     return in(DummyClientEnvironment.inTesting());
   }
 
-  public ResilientClientBuilder(ClientEnvironment environment) {
+  public ResilientClientBuilderNew(ClientEnvironment environment) {
     this.appMetrics = environment.getMetricsRegistry();
     this.environment = environment;
   }
 
-  public ResilientClientBuilder using(EndpointConfiguration configuration) {
+  public ResilientClientBuilderNew using(EndpointConfiguration configuration) {
 
     using(configuration.getPrimaryNodes(), configuration.getSecondaryNodes());
 
@@ -86,11 +84,11 @@ public class ResilientClientBuilder {
     return this;
   }
 
-  public ResilientClientBuilder usingDNS() {
+  public ResilientClientBuilderNew usingDNS() {
     return withResilienceStrategy(ResilienceStrategy.DYNAMIC_RANDOM_IP_STRATEGY);
   }
 
-  public ResilientClientBuilder using(
+  public ResilientClientBuilderNew using(
       List<SimpleEndpointConfiguration> primaryNodes,
       List<SimpleEndpointConfiguration> secondaryNodes) {
     this.primaryNodes = primaryNodes;
@@ -98,63 +96,63 @@ public class ResilientClientBuilder {
     return this;
   }
 
-  public ResilientClientBuilder using(JerseyClientConfiguration jerseyClientConfiguration) {
+  public ResilientClientBuilderNew using(JerseyClientConfiguration jerseyClientConfiguration) {
     this.jerseyClientConfig = jerseyClientConfiguration;
     return this;
   }
 
-  public ResilientClientBuilder named(String name) {
+  public ResilientClientBuilderNew named(String name) {
     this.shortName = name;
     return this;
   }
 
-  public ResilientClientBuilder withPrimary(HostAndPortProvider provider) {
+  public ResilientClientBuilderNew withPrimary(HostAndPortProvider provider) {
     this.primaryProvider = provider;
     return this;
   }
 
-  public ResilientClientBuilder withSecondary(HostAndPortProvider provider) {
+  public ResilientClientBuilderNew withSecondary(HostAndPortProvider provider) {
     this.secondaryProvider = provider;
     return this;
   }
 
-  public ResilientClientBuilder retryingNonIdempotentMethods(boolean retryNonIdempotentMethods) {
+  public ResilientClientBuilderNew retryingNonIdempotentMethods(boolean retryNonIdempotentMethods) {
     this.retryNonIdempotentMethods = retryNonIdempotentMethods;
     return this;
   }
 
-  public ResilientClientBuilder withResilienceStrategy(ResilienceStrategy resilienceStrategy) {
+  public ResilientClientBuilderNew withResilienceStrategy(ResilienceStrategy resilienceStrategy) {
     this.resilienceStrategy = resilienceStrategy;
     return this;
   }
 
   /* mostly for testing */
-  public ResilientClientBuilder withHostAndPortResolver(HostAndPortIpResolver resolver) {
+  public ResilientClientBuilderNew withHostAndPortResolver(HostAndPortIpResolver resolver) {
     this.hostAndPortIpResolver = resolver;
     return this;
   }
 
-  public ResilientClientBuilder withContinuationPolicy(ContinuationPolicy continuationPolicy) {
+  public ResilientClientBuilderNew withContinuationPolicy(ContinuationPolicy continuationPolicy) {
     this.continuationPolicy = continuationPolicy;
     return this;
   }
 
-  public ResilientClientBuilder withTransactionPropagation() {
+  public ResilientClientBuilderNew withTransactionPropagation() {
     this.txHeader = DEFAULT_TX_HEADER;
     return this;
   }
 
-  public ResilientClientBuilder withProtocol(String protocol) {
+  public ResilientClientBuilderNew withProtocol(String protocol) {
     this.protocol = protocol;
     return this;
   }
 
-  public ResilientClientBuilder usingAdminPorts() {
+  public ResilientClientBuilderNew usingAdminPorts() {
     useAdminPorts = true;
     return this;
   }
 
-  public ResilientClient build() {
+  public ResilientClientNew build() {
 
     if (primaryProvider != null) {
       Preconditions.checkState(configuration != null, "Missing endpoint configuration");
@@ -203,24 +201,26 @@ public class ResilientClientBuilder {
 
     String shortName = getShortName(useAdminPorts);
 
-    final ResilientClient client =
-        new ResilientClient(
+    final ClientConfig clientConfig = buildConfig();
+
+    ExecutorService threadPool =
+        environment.createExecutorService(
+            shortName, jerseyClientConfig.getMinThreads(), jerseyClientConfig.getMaxThreads());
+    // client.register(threadPool);
+    clientConfig.executorService(threadPool);
+
+    final ResilientClientNew client =
+        new ResilientClientNew(
             shortName,
-            buildHandler(shortName),
-            buildConfig(),
+            clientConfig,
             finalProvider,
             continuationPolicy,
             retryNonIdempotentMethods,
             appMetrics);
 
-    ExecutorService threadPool =
-        environment.createExecutorService(
-            shortName, jerseyClientConfig.getMinThreads(), jerseyClientConfig.getMaxThreads());
-    client.setExecutorService(threadPool);
-
     if (jerseyClientConfig.isGzipEnabled()) {
-      client.addFilter(
-          new GZIPContentEncodingFilter(jerseyClientConfig.isGzipEnabledForRequests()));
+      client.register(GZipEncoder.class);
+      client.register(EncodingFilter.class);
     }
     client.setTransactionHeader(txHeader);
     client.setProtocol(configuration != null ? configuration.getProtocol() : EMPTY_STRING);
@@ -252,21 +252,10 @@ public class ResilientClientBuilder {
     return shortName;
   }
 
-  private ApacheHttpClient4Handler buildHandler(String shortName) {
-
-    HttpClientBuilder builder = new HttpClientBuilder(appMetrics);
-
-    builder.using(jerseyClientConfig);
-
-    return new ApacheHttpClient4Handler(builder.build(shortName), null, true);
-  }
-
-  private ApacheHttpClient4Config buildConfig() {
-    final ApacheHttpClient4Config config = new DefaultApacheHttpClient4Config();
+  private ClientConfig buildConfig() {
     final ObjectMapper objectMapper = environment.createObjectMapper();
 
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    config.getSingletons().add(new JacksonMessageBodyProvider(objectMapper));
-    return config;
+    return new ClientConfig(new JacksonMessageBodyProvider(objectMapper));
   }
 }

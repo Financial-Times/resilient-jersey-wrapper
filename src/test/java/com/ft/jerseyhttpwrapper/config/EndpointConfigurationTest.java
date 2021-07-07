@@ -6,6 +6,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.ft.jerseyhttpwrapper.ResilienceStrategy;
 import com.google.common.base.Optional;
 import io.dropwizard.client.JerseyClientConfiguration;
@@ -21,6 +22,7 @@ public class EndpointConfigurationTest {
   @Before
   public void registerGuavaModules() {
     objectMapper.registerModule(new GuavaModule());
+    objectMapper.registerModule(new Jdk8Module());
   }
 
   @Test

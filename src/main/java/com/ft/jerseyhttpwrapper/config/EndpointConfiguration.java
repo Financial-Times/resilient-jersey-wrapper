@@ -3,7 +3,7 @@ package com.ft.jerseyhttpwrapper.config;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ft.jerseyhttpwrapper.ResilienceStrategy;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import io.dropwizard.client.JerseyClientConfiguration;
 import java.util.ArrayList;
@@ -130,8 +130,8 @@ public class EndpointConfiguration {
     return resilienceStrategy;
   }
 
-  protected Objects.ToStringHelper toStringHelper() {
-    return Objects.toStringHelper(this)
+  protected MoreObjects.ToStringHelper toStringHelper() {
+    return MoreObjects.toStringHelper(this)
         .add("shortName", shortName)
         .add("jerseyClientConfiguration", jerseyClientConfiguration)
         .add("primaryNodes", primaryNodes)
