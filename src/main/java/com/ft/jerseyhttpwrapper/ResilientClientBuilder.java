@@ -20,6 +20,7 @@ import io.dropwizard.setup.Environment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Convenience for the creation of resilient clients.
@@ -253,12 +254,10 @@ public class ResilientClientBuilder {
   }
 
   private ApacheHttpClient4Handler buildHandler(String shortName) {
+    CloseableHttpClient httpClient =
+        new HttpClientBuilder(appMetrics).using(jerseyClientConfig).build(shortName);
 
-    HttpClientBuilder builder = new HttpClientBuilder(appMetrics);
-
-    builder.using(jerseyClientConfig);
-
-    return new ApacheHttpClient4Handler(builder.build(shortName), null, true);
+    return new ApacheHttpClient4Handler(httpClient, null, true);
   }
 
   private ApacheHttpClient4Config buildConfig() {

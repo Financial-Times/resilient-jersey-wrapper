@@ -43,7 +43,7 @@ public class MultivaluePatternValidator
         context.disableDefaultConstraintViolation();
         context
             .buildConstraintViolationWithTemplate(messageWithValue)
-            .addNode(Integer.toString(i))
+            .addPropertyNode(Integer.toString(i))
             .addConstraintViolation();
 
         result = false;

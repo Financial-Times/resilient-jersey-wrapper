@@ -25,33 +25,24 @@ public class EndpointConfigurationTest {
 
   @Test
   public void shouldNotFailOnNullNodes() {
-    new EndpointConfiguration(
-        Optional.<String>absent(),
-        Optional.<JerseyClientConfiguration>absent(),
-        Optional.<String>absent(),
-        null,
-        null);
+    new EndpointConfiguration(Optional.absent(), Optional.absent(), Optional.absent(), null, null);
   }
 
   @Test
   public void shouldNotFailOnEmptyNodes() {
     new EndpointConfiguration(
-        Optional.<String>absent(),
-        Optional.<JerseyClientConfiguration>absent(),
-        Optional.<String>absent(),
-        Collections.<String>emptyList(),
-        Collections.<String>emptyList());
+        Optional.absent(),
+        Optional.absent(),
+        Optional.absent(),
+        Collections.emptyList(),
+        Collections.emptyList());
   }
 
   @Test
   public void shouldHaveNoNodesWhenNullNodes() {
     EndpointConfiguration configuration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
-            Optional.<JerseyClientConfiguration>absent(),
-            Optional.<String>absent(),
-            null,
-            null);
+            Optional.absent(), Optional.absent(), Optional.absent(), null, null);
     assertThat(configuration.getPrimaryNodes().size(), equalTo(0));
     assertThat(configuration.getSecondaryNodes().size(), equalTo(0));
   }
@@ -60,11 +51,11 @@ public class EndpointConfigurationTest {
   public void shouldHaveNoNodesWhenEmptyNodes() {
     EndpointConfiguration configuration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
-            Optional.<JerseyClientConfiguration>absent(),
-            Optional.<String>absent(),
-            Collections.<String>emptyList(),
-            Collections.<String>emptyList());
+            Optional.absent(),
+            Optional.absent(),
+            Optional.absent(),
+            Collections.emptyList(),
+            Collections.emptyList());
     assertThat(configuration.getPrimaryNodes().size(), equalTo(0));
     assertThat(configuration.getSecondaryNodes().size(), equalTo(0));
   }
@@ -73,11 +64,11 @@ public class EndpointConfigurationTest {
   public void shouldHaveOnePrimaryNodeWhenOneNodeGiven() {
     EndpointConfiguration configuration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
-            Optional.<JerseyClientConfiguration>absent(),
-            Optional.<String>absent(),
-            Arrays.asList("host:80:81"),
-            Collections.<String>emptyList());
+            Optional.absent(),
+            Optional.absent(),
+            Optional.absent(),
+            Collections.singletonList("host:80:81"),
+            Collections.emptyList());
     assertThat(configuration.getPrimaryNodes().size(), equalTo(1));
     assertThat(configuration.getSecondaryNodes().size(), equalTo(0));
 
@@ -90,11 +81,11 @@ public class EndpointConfigurationTest {
   public void shouldHaveOneSecondaryNodeWhenOneNodeGiven() {
     EndpointConfiguration configuration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
-            Optional.<JerseyClientConfiguration>absent(),
-            Optional.<String>absent(),
-            Collections.<String>emptyList(),
-            Arrays.asList("host:80:81"));
+            Optional.absent(),
+            Optional.absent(),
+            Optional.absent(),
+            Collections.emptyList(),
+            Collections.singletonList("host:80:81"));
     assertThat(configuration.getPrimaryNodes().size(), equalTo(0));
     assertThat(configuration.getSecondaryNodes().size(), equalTo(1));
 
@@ -107,11 +98,11 @@ public class EndpointConfigurationTest {
   public void shouldHaveOneSecondaryNodeAndCorrectAdminPortWhenOneNodeGivenAndNoAdminPortGiven() {
     EndpointConfiguration configuration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
-            Optional.<JerseyClientConfiguration>absent(),
-            Optional.<String>absent(),
-            Collections.<String>emptyList(),
-            Arrays.asList("host:80"));
+            Optional.absent(),
+            Optional.absent(),
+            Optional.absent(),
+            Collections.emptyList(),
+            Collections.singletonList("host:80"));
     assertThat(configuration.getPrimaryNodes().size(), equalTo(0));
     assertThat(configuration.getSecondaryNodes().size(), equalTo(1));
 
@@ -124,11 +115,11 @@ public class EndpointConfigurationTest {
   public void shouldHaveTwoPrimaryNodesWhenTwoNodesGiven() {
     EndpointConfiguration configuration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
-            Optional.<JerseyClientConfiguration>absent(),
-            Optional.<String>absent(),
+            Optional.absent(),
+            Optional.absent(),
+            Optional.absent(),
             Arrays.asList("host:80:81", "host2:90:91"),
-            Collections.<String>emptyList());
+            Collections.emptyList());
     assertThat(configuration.getPrimaryNodes().size(), equalTo(2));
     assertThat(configuration.getSecondaryNodes().size(), equalTo(0));
 
@@ -146,11 +137,11 @@ public class EndpointConfigurationTest {
   public void shouldHaveTwoPrimaryNodesWhenTwoNodesGivenWeirdWhiteSpace() {
     EndpointConfiguration configuration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
-            Optional.<JerseyClientConfiguration>absent(),
-            Optional.<String>absent(),
+            Optional.absent(),
+            Optional.absent(),
+            Optional.absent(),
             Arrays.asList(" host:80:81 ", " host2:90:91"),
-            Collections.<String>emptyList());
+            Collections.emptyList());
     assertThat(configuration.getPrimaryNodes().size(), equalTo(2));
     assertThat(configuration.getSecondaryNodes().size(), equalTo(0));
 
@@ -166,11 +157,11 @@ public class EndpointConfigurationTest {
   public void shouldHaveThreePrimaryNodesWhenTwoNodesGivenWeirdWhiteSpace() {
     EndpointConfiguration configuration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
-            Optional.<JerseyClientConfiguration>absent(),
-            Optional.<String>absent(),
+            Optional.absent(),
+            Optional.absent(),
+            Optional.absent(),
             Arrays.asList(" host:80:81 ", "host2:90:91 ", "host3:100:101"),
-            Collections.<String>emptyList());
+            Collections.emptyList());
     assertThat(configuration.getPrimaryNodes().size(), equalTo(3));
     assertThat(configuration.getSecondaryNodes().size(), equalTo(0));
 
@@ -194,7 +185,7 @@ public class EndpointConfigurationTest {
             Optional.of(jerseyClientConfig),
             Optional.of("path"),
             Arrays.asList(" host:80:81", "host2:90:91"),
-            Arrays.asList("host3:100:101"));
+            Collections.singletonList("host3:100:101"));
 
     final String json = objectMapper.writeValueAsString(endpointConfig);
     final EndpointConfiguration readEndpointConfig =
@@ -214,11 +205,11 @@ public class EndpointConfigurationTest {
     final JerseyClientConfiguration jerseyClientConfig = new JerseyClientConfiguration();
     final EndpointConfiguration endpointConfig =
         new EndpointConfiguration(
-            Optional.<String>absent(),
+            Optional.absent(),
             Optional.of(jerseyClientConfig),
-            Optional.<String>absent(),
-            Arrays.asList(" host:80:81"),
-            Collections.<String>emptyList());
+            Optional.absent(),
+            Collections.singletonList(" host:80:81"),
+            Collections.emptyList());
     endpointConfig.setRetryNonIdempotentMethods(true);
 
     final String json = objectMapper.writeValueAsString(endpointConfig);
@@ -233,11 +224,11 @@ public class EndpointConfigurationTest {
     final JerseyClientConfiguration jerseyClientConfig = new JerseyClientConfiguration();
     final EndpointConfiguration endpointConfig =
         new EndpointConfiguration(
-            Optional.<String>absent(),
+            Optional.absent(),
             Optional.of(jerseyClientConfig),
-            Optional.<String>absent(),
-            Arrays.asList("host:80:81"),
-            Collections.<String>emptyList());
+            Optional.absent(),
+            Collections.singletonList("host:80:81"),
+            Collections.emptyList());
     endpointConfig.setResilienceStrategy(ResilienceStrategy.LOAD_BALANCED_IP_STRATEGY);
 
     final String json = objectMapper.writeValueAsString(endpointConfig);
@@ -254,11 +245,11 @@ public class EndpointConfigurationTest {
     final JerseyClientConfiguration jerseyClientConfig = new JerseyClientConfiguration();
     final EndpointConfiguration endpointConfig =
         new EndpointConfiguration(
-            Optional.<String>absent(),
+            Optional.absent(),
             Optional.of(jerseyClientConfig),
-            Optional.<String>absent(),
-            Arrays.asList(" host:80:81"),
-            Collections.<String>emptyList());
+            Optional.absent(),
+            Collections.singletonList(" host:80:81"),
+            Collections.emptyList());
 
     assertThat(endpointConfig.isRetryNonIdempotentMethods(), is(false));
   }
@@ -267,11 +258,11 @@ public class EndpointConfigurationTest {
   public void thatDefaultsToHttpOnPort80() {
     EndpointConfiguration configuration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
-            Optional.<JerseyClientConfiguration>absent(),
-            Optional.<String>absent(),
+            Optional.absent(),
+            Optional.absent(),
+            Optional.absent(),
             Arrays.asList("host1", "host2:90:91"),
-            Collections.<String>emptyList());
+            Collections.emptyList());
     assertThat(configuration.getPrimaryNodes().size(), equalTo(2));
     assertThat(configuration.getSecondaryNodes().size(), equalTo(0));
 
@@ -289,11 +280,11 @@ public class EndpointConfigurationTest {
   public void thatDefaultsToPort80ForHttp() {
     EndpointConfiguration configuration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
-            Optional.<JerseyClientConfiguration>absent(),
-            Optional.<String>absent(),
+            Optional.absent(),
+            Optional.absent(),
+            Optional.absent(),
             Arrays.asList("http://host1", "host2:90:91"),
-            Collections.<String>emptyList());
+            Collections.emptyList());
     assertThat(configuration.getPrimaryNodes().size(), equalTo(2));
     assertThat(configuration.getSecondaryNodes().size(), equalTo(0));
 
@@ -311,11 +302,11 @@ public class EndpointConfigurationTest {
   public void thatHttpsIsSupported() {
     EndpointConfiguration configuration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
-            Optional.<JerseyClientConfiguration>absent(),
-            Optional.<String>absent(),
+            Optional.absent(),
+            Optional.absent(),
+            Optional.absent(),
             Arrays.asList("https://host:8443:8444", "host2:9090:9091"),
-            Collections.<String>emptyList());
+            Collections.emptyList());
     assertThat(configuration.getPrimaryNodes().size(), equalTo(2));
     assertThat(configuration.getSecondaryNodes().size(), equalTo(0));
 
@@ -333,11 +324,11 @@ public class EndpointConfigurationTest {
   public void thatDefaultsToPort443ForHttps() {
     EndpointConfiguration configuration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
-            Optional.<JerseyClientConfiguration>absent(),
-            Optional.<String>absent(),
+            Optional.absent(),
+            Optional.absent(),
+            Optional.absent(),
             Arrays.asList("https://host1", "host2:90:91"),
-            Collections.<String>emptyList());
+            Collections.emptyList());
     assertThat(configuration.getPrimaryNodes().size(), equalTo(2));
     assertThat(configuration.getSecondaryNodes().size(), equalTo(0));
 
@@ -354,22 +345,22 @@ public class EndpointConfigurationTest {
   @Test(expected = IllegalArgumentException.class)
   public void thatMixedProtocolsAreNotAllowed() {
     new EndpointConfiguration(
-        Optional.<String>absent(),
-        Optional.<JerseyClientConfiguration>absent(),
-        Optional.<String>absent(),
+        Optional.absent(),
+        Optional.absent(),
+        Optional.absent(),
         Arrays.asList("https://host1", "http://host2:90:91"),
-        Collections.<String>emptyList());
+        Collections.emptyList());
   }
 
   @Test
   public void thatSecondaryNodeDefaultsToPrimaryNodesProtocol() {
     EndpointConfiguration configuration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
-            Optional.<JerseyClientConfiguration>absent(),
-            Optional.<String>absent(),
-            Arrays.asList("https://host1"),
-            Arrays.asList("host2"));
+            Optional.absent(),
+            Optional.absent(),
+            Optional.absent(),
+            Collections.singletonList("https://host1"),
+            Collections.singletonList("host2"));
     assertThat(configuration.getPrimaryNodes().size(), equalTo(1));
     assertThat(configuration.getSecondaryNodes().size(), equalTo(1));
 
@@ -386,10 +377,10 @@ public class EndpointConfigurationTest {
   @Test(expected = IllegalArgumentException.class)
   public void thatMixedPrimaryAndSecondaryProtocolsAreNotAllowed() {
     new EndpointConfiguration(
-        Optional.<String>absent(),
-        Optional.<JerseyClientConfiguration>absent(),
-        Optional.<String>absent(),
-        Arrays.asList(/*http://*/ "host1"),
-        Arrays.asList("https://host2"));
+        Optional.absent(),
+        Optional.absent(),
+        Optional.absent(),
+        Collections.singletonList(/*http://*/ "host1"),
+        Collections.singletonList("https://host2"));
   }
 }

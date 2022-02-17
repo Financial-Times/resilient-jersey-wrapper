@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * ExponentialBackoffContinuationSessionTest
@@ -124,14 +124,10 @@ public class ExponentialBackoffContinuationSessionTest {
     when(firstMockProviderIterator.next())
         .thenReturn(someHost); // always this one, we aren't checking
     when(secondMockProviderIterator.next()).thenReturn(someHost);
-    when(thirdMockProviderIterator.next()).thenReturn(someHost);
 
     // iterator behaviour consistent with 2 hosts over two loops.
     when(firstMockProviderIterator.hasNext()).thenReturn(true, true, false);
     when(secondMockProviderIterator.hasNext()).thenReturn(true, true, false);
-
-    // add provision for a third loop to demonstrate the session stopping on it's own
-    when(thirdMockProviderIterator.hasNext()).thenReturn(true, true, false);
 
     final ExponentialBackoffContinuationSession session =
         new ExponentialBackoffContinuationSession(

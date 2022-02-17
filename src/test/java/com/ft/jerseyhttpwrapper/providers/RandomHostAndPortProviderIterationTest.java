@@ -2,8 +2,8 @@ package com.ft.jerseyhttpwrapper.providers;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.*;
 
 import com.google.common.collect.Lists;
 import com.google.common.net.HostAndPort;
@@ -14,8 +14,7 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * RandomHostAndPortProviderIterationTest
@@ -35,7 +34,7 @@ public class RandomHostAndPortProviderIterationTest {
 
   private RandomHostAndPortProvider provider;
 
-  @Mock Random sequence;
+  Random sequence = mock(Random.class, withSettings().withoutAnnotations());
 
   @Before
   public void setUp() {

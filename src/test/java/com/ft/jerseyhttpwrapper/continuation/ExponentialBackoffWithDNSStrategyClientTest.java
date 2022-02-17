@@ -4,7 +4,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import com.ft.jerseyhttpwrapper.ResilientClientBuilder;
@@ -26,8 +25,9 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * ExponentialBackoffWithDNSStrategyClientTest
@@ -128,7 +128,7 @@ public class ExponentialBackoffWithDNSStrategyClientTest {
   }
 
   private void givenThreeNodesAreLookedUp() {
-    when(mockResolver.resolve(any(HostAndPort.class)))
+    when(mockResolver.resolve(ArgumentMatchers.any(HostAndPort.class)))
         .thenReturn(
             Arrays.asList(
                 HostAndPort.fromParts("localhost", instanceRule1.port()),
