@@ -27,7 +27,6 @@ import com.github.tomakehurst.wiremock.http.HttpHeader;
 import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.net.HostAndPort;
 import com.sun.jersey.api.client.Client;
@@ -40,6 +39,7 @@ import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.*;
 import org.slf4j.MDC;
@@ -234,11 +234,11 @@ public class ResilientClientTest {
 
     final EndpointConfiguration endpointConfiguration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
+            Optional.empty(),
             Optional.of(jerseyClientConfiguration),
-            Optional.<String>absent(),
+            Optional.empty(),
             Lists.newArrayList(wmNode1.toString(), wmNode2.toString()),
-            Lists.<String>newArrayList());
+            Lists.newArrayList());
 
     Client client =
         ResilientClientBuilder.in(DummyClientEnvironment.inTesting())
@@ -269,11 +269,11 @@ public class ResilientClientTest {
 
     final EndpointConfiguration endpointConfiguration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
+            Optional.empty(),
             Optional.of(jerseyClientConfiguration),
-            Optional.<String>absent(),
+            Optional.empty(),
             Lists.newArrayList(wmNode1.toString(), wmNode2.toString()),
-            Lists.<String>newArrayList());
+            Lists.newArrayList());
 
     Client client =
         ResilientClientBuilder.in(DummyClientEnvironment.inTesting())
@@ -307,11 +307,11 @@ public class ResilientClientTest {
 
     final EndpointConfiguration endpointConfiguration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
+            Optional.empty(),
             Optional.of(jerseyClientConfiguration),
-            Optional.<String>absent(),
+            Optional.empty(),
             Lists.newArrayList(wmNode1.toString()),
-            Lists.<String>newArrayList());
+            Lists.newArrayList());
 
     Client client =
         ResilientClientBuilder.in(DummyClientEnvironment.inTesting())
@@ -353,11 +353,11 @@ public class ResilientClientTest {
 
     final EndpointConfiguration endpointConfiguration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
+            Optional.empty(),
             Optional.of(jerseyClientConfiguration),
-            Optional.<String>absent(),
+            Optional.empty(),
             Lists.newArrayList(wmNode1.toString()),
-            Lists.<String>newArrayList());
+            Lists.newArrayList());
 
     Client client =
         ResilientClientBuilder.in(DummyClientEnvironment.inTesting())
@@ -390,11 +390,11 @@ public class ResilientClientTest {
 
     final EndpointConfiguration endpointConfiguration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
+            Optional.empty(),
             Optional.of(jerseyClientConfiguration),
-            Optional.<String>absent(),
+            Optional.empty(),
             Lists.newArrayList(noNode.toString()),
-            Lists.<String>newArrayList());
+            Lists.newArrayList());
 
     Client client =
         ResilientClientBuilder.in(DummyClientEnvironment.inTesting())
@@ -424,11 +424,11 @@ public class ResilientClientTest {
 
     final EndpointConfiguration endpointConfiguration =
         new EndpointConfiguration(
-            Optional.<String>absent(),
+            Optional.empty(),
             Optional.of(jerseyClientConfiguration),
-            Optional.<String>absent(),
+            Optional.empty(),
             Lists.newArrayList(wmNode1_delayed.toString()),
-            Lists.<String>newArrayList());
+            Lists.newArrayList());
 
     Client client =
         ResilientClientBuilder.in(DummyClientEnvironment.inTesting())

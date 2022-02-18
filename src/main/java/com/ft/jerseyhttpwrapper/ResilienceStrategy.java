@@ -1,6 +1,6 @@
 package com.ft.jerseyhttpwrapper;
 
-import com.google.common.base.Objects;
+import static com.google.common.base.MoreObjects.toStringHelper;
 
 public enum ResilienceStrategy {
   EMPTY_STRATEGY("No hosts - for testing."),
@@ -17,9 +17,6 @@ public enum ResilienceStrategy {
 
   @Override
   public String toString() {
-    return Objects.toStringHelper(this)
-        .add("name", name())
-        .add("description", description)
-        .toString();
+    return toStringHelper(this).add("name", name()).add("description", description).toString();
   }
 }

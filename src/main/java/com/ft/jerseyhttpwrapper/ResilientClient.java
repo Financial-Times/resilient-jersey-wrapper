@@ -142,7 +142,7 @@ public class ResilientClient extends Client {
 
         HostAndPort hostAndPort = session.nextHost();
 
-        if (Strings.isNullOrEmpty(hostAndPort.getHostText())) {
+        if (Strings.isNullOrEmpty(hostAndPort.getHost())) {
           // never been thrown, but helpful in proving/falsifying some theories in the debugger. SJG
           // Jan 2015
           throw new IllegalStateException(
@@ -151,7 +151,7 @@ public class ResilientClient extends Client {
 
         URI attemptUri =
             UriBuilder.fromUri(requestedUri)
-                .host(hostAndPort.getHostText())
+                .host(hostAndPort.getHost())
                 .port(hostAndPort.getPortOrDefault(8080))
                 .build();
 

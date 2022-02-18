@@ -3,6 +3,7 @@ package com.ft.jerseyhttpwrapper;
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.ft.jerseyhttpwrapper.config.*;
 import com.ft.jerseyhttpwrapper.continuation.ContinuationPolicy;
 import com.ft.jerseyhttpwrapper.continuation.DefaultContinuationPolicy;
@@ -61,7 +62,7 @@ public class ResilientClientBuilder {
   public static ResilientClientBuilder inTesting(HostAndPort endpoint) {
 
     EndpointConfiguration testHost =
-        EndpointConfiguration.forTesting(endpoint.getHostText(), endpoint.getPortOrDefault(8080));
+        EndpointConfiguration.forTesting(endpoint.getHost(), endpoint.getPortOrDefault(8080));
 
     return inTesting().using(testHost);
   }
@@ -246,7 +247,9 @@ public class ResilientClientBuilder {
     }
 
     String shortName =
-        configuration.getShortName().or(String.format("%s-%d", configuration.getHost(), getPort()));
+        configuration
+            .getShortName()
+            .orElse(String.format("%s-%d", configuration.getHost(), getPort()));
     if (useAdminPorts) {
       return shortName + "-admin";
     }
@@ -265,9 +268,9 @@ public class ResilientClientBuilder {
     final ObjectMapper objectMapper = environment.createObjectMapper();
 
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    config
-        .getSingletons()
-        .add(new JacksonMessageBodyProvider(objectMapper, environment.getValidator()));
+    objectMapper.registerModule(new Jdk8Module());
+
+    config.getSingletons().add(new JacksonMessageBodyProvider(objectMapper));
     return config;
   }
 }

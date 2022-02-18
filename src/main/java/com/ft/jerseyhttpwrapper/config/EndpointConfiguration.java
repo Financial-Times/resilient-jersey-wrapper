@@ -3,13 +3,13 @@ package com.ft.jerseyhttpwrapper.config;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ft.jerseyhttpwrapper.ResilienceStrategy;
-import com.google.common.base.Objects;
-import com.google.common.base.Optional;
+import com.google.common.base.MoreObjects;
 import io.dropwizard.client.JerseyClientConfiguration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,9 +45,9 @@ public class EndpointConfiguration {
     return new EndpointConfiguration(
         Optional.of(String.format("test-%s-%s", host, port)),
         Optional.of(clientConfig),
-        Optional.<String>absent(),
+        Optional.empty(),
         Arrays.asList(String.format("%s:%d:%d", host, port, port + 1)),
-        Collections.<String>emptyList());
+        Collections.emptyList());
   }
 
   public EndpointConfiguration(
@@ -57,8 +57,9 @@ public class EndpointConfiguration {
       @JsonProperty("primaryNodes") List<String> primaryNodesRaw,
       @JsonProperty("secondaryNodes") List<String> secondaryNodesRaw) {
     this.shortName = shortName;
-    this.jerseyClientConfiguration = jerseyClientConfiguration.or(new JerseyClientConfiguration());
-    this.path = path.or("/");
+    this.jerseyClientConfiguration =
+        jerseyClientConfiguration.orElse(new JerseyClientConfiguration());
+    this.path = path.orElse("/");
     this.primaryNodes = extractNodes(primaryNodesRaw, null);
     String protocol = primaryNodes.isEmpty() ? null : primaryNodes.get(0).getProtocol();
     this.secondaryNodes = extractNodes(secondaryNodesRaw, protocol);
@@ -130,8 +131,8 @@ public class EndpointConfiguration {
     return resilienceStrategy;
   }
 
-  protected Objects.ToStringHelper toStringHelper() {
-    return Objects.toStringHelper(this)
+  protected MoreObjects.ToStringHelper toStringHelper() {
+    return MoreObjects.toStringHelper(this)
         .add("shortName", shortName)
         .add("jerseyClientConfiguration", jerseyClientConfiguration)
         .add("primaryNodes", primaryNodes)

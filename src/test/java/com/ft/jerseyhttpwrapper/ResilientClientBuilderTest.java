@@ -4,11 +4,10 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 import com.ft.jerseyhttpwrapper.config.EndpointConfiguration;
-import com.google.common.base.Optional;
 import com.google.common.net.HostAndPort;
 import io.dropwizard.client.JerseyClientConfiguration;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import org.junit.Test;
 
 /**
@@ -51,11 +50,11 @@ public class ResilientClientBuilderTest {
     final JerseyClientConfiguration jerseyClientConfig = new JerseyClientConfiguration();
     final EndpointConfiguration endpointConfig =
         new EndpointConfiguration(
-            Optional.<String>absent(),
+            Optional.empty(),
             Optional.of(jerseyClientConfig),
-            Optional.<String>absent(),
-            Arrays.asList("host:80:81"),
-            Collections.<String>emptyList());
+            Optional.empty(),
+            Collections.singletonList("host:80:81"),
+            Collections.emptyList());
     endpointConfig.setResilienceStrategy(ResilienceStrategy.DYNAMIC_RANDOM_IP_STRATEGY);
 
     ResilientClientBuilder.inTesting().using(endpointConfig).build();

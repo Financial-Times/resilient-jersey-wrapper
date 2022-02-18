@@ -47,9 +47,9 @@ public class RandomHostAndPortProviderIterationTest {
 
     Iterator<HostAndPort> hosts = provider.iterator(EXAMPLE_ENDPOINT);
 
-    assertThat(hosts.next().getHostText(), is("a"));
-    assertThat(hosts.next().getHostText(), is("b"));
-    assertThat(hosts.next().getHostText(), is("c"));
+    assertThat(hosts.next().getHost(), is("a"));
+    assertThat(hosts.next().getHost(), is("b"));
+    assertThat(hosts.next().getHost(), is("c"));
   }
 
   @Test
