@@ -1,10 +1,14 @@
-version: 2
+version: 2.1
+
+executors:
+  maven:
+    docker:
+      - image: maven:3.6-jdk-11
+
 jobs:
   build:
     working_directory: ~/resilient-jersey-wrapper
-    docker:
-      - image: maven
-      - image: java:openjdk-8
+    executor: maven
     steps:
       - checkout
       - run:
@@ -21,8 +25,7 @@ jobs:
             rm -rf /root/.m2/*
   publish-nexus:
     working_directory: ~/jesilient-jersey-wrapper
-    docker:
-      - image: coco/dropwizardbase-internal:v1.0.3
+    executor: maven
     steps:
       - checkout:
             path: ~/jesilient-jersey-wrapper
