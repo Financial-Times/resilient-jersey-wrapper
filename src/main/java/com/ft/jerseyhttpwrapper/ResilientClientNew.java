@@ -11,12 +11,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Supplier;
 import com.google.common.net.HostAndPort;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientHandler;
-import com.sun.jersey.api.client.ClientHandlerException;
-import com.sun.jersey.api.client.ClientRequest;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.config.ClientConfig;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
@@ -24,10 +18,20 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.Future;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.UriBuilder;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.client.ClientRequest;
+import org.glassfish.jersey.client.ClientResponse;
+import org.glassfish.jersey.client.JerseyClient;
+import org.glassfish.jersey.client.spi.AsyncConnectorCallback;
+import org.glassfish.jersey.client.spi.Connector;
 import org.slf4j.MDC;
 
-public class ResilientClient extends Client {
+public class ResilientClientNew extends JerseyClient implements Connector {
 
   /**
    * Maven dumps it's properties into a file when it build the JAR. Turns out you can read it at
@@ -70,16 +74,14 @@ public class ResilientClient extends Client {
 
   private String txPropagationHeader;
 
-  public ResilientClient(
+  public ResilientClientNew(
       String shortName,
-      ClientHandler root,
       ClientConfig config,
       HostAndPortProvider provider,
       ContinuationPolicy continuationPolicy,
       boolean retryNonIdempotentMethods,
       MetricRegistry appMetrics) {
-    super(root, config);
-
+    super(config, (SSLContext) null, (HostnameVerifier) null);
     Preconditions.checkNotNull(shortName, "Resilient clients must be named");
     Preconditions.checkNotNull(provider, "host and port provider is mandatory");
 
@@ -89,38 +91,32 @@ public class ResilientClient extends Client {
     this.retryNonIdempotentMethods = retryNonIdempotentMethods;
 
     this.requests =
-        appMetrics.timer(MetricRegistry.name(ResilientClient.class, "requests", shortName));
+        appMetrics.timer(MetricRegistry.name(ResilientClientNew.class, "requests", shortName));
     this.attemptCounts =
-        appMetrics.histogram(MetricRegistry.name(ResilientClient.class, "attemptCount", shortName));
+        appMetrics.histogram(
+            MetricRegistry.name(ResilientClientNew.class, "attemptCount", shortName));
 
     attemptLoggerFactory =
-        new AttemptLoggerFactory(
-            appMetrics.timer(MetricRegistry.name(ResilientClient.class, "attempts", shortName)));
+        new AttemptLoggerFactoryNew(
+            appMetrics.timer(MetricRegistry.name(ResilientClientNew.class, "attempts", shortName)));
   }
 
   private final HostAndPortProvider provider;
   private final boolean retryNonIdempotentMethods;
 
-  private AttemptLoggerFactory attemptLoggerFactory;
+  private AttemptLoggerFactoryNew attemptLoggerFactory;
   private final Timer requests;
   private final Histogram attemptCounts;
 
-  // TODO:
-  // TimeOut the request - helps in case the host list is long and most of them are failing slowly
   @Override
-  public ClientResponse handle(final ClientRequest originalRequest) throws ClientHandlerException {
-    URI requestedUri = originalRequest.getURI();
-    if ("https".equals(requestedUri.getScheme())) {
-      // minimal support for https (don't fiddle with hostname) - just pass-through to the default
-      // impl
-      return super.handle(originalRequest);
-    }
+  public ClientResponse apply(final ClientRequest originalRequest) {
+    URI requestedUri = originalRequest.getUri();
 
     Timer.Context requestsTimer = requests.time();
     int attemptCount = 0;
     int failedAttemptCount = 0;
 
-    ClientHandlerException lastClientHandlerException = null;
+    ProcessingException lastProcessingException = null;
     ClientResponse lastResponse = null;
 
     HostAndPort suppliedAddress = HostAndPort.fromString(requestedUri.getAuthority());
@@ -155,17 +151,17 @@ public class ResilientClient extends Client {
                 .port(hostAndPort.getPortOrDefault(8080))
                 .build();
 
-        ClientRequest clonedRequest = originalRequest.clone();
-        clonedRequest.setURI(attemptUri);
+        ClientRequest clonedRequest = new ClientRequest(originalRequest);
+        clonedRequest.setUri(attemptUri);
         clonedRequest.getHeaders().putSingle("User-Agent", userAgentSupplier.get());
 
         maybePropagateTransactionId(clonedRequest);
 
-        AttemptLogger attempt = attemptLoggerFactory.startTimers(attemptUri, clonedRequest);
+        AttemptLoggerNew attempt = attemptLoggerFactory.startTimers(attemptUri, clonedRequest);
 
         if (lastResponse != null) {
           try {
-            lastResponse.getEntityInputStream().close();
+            lastResponse.getEntityStream().close();
           } catch (IOException e) {
             operationJson
                 .wasFailure()
@@ -181,11 +177,10 @@ public class ResilientClient extends Client {
 
         try {
           attemptCount++;
-          currentResponse = super.handle(clonedRequest);
+          currentResponse = this.apply(clonedRequest);
           lastResponse = currentResponse;
 
           if (RECOVERABLE_STATUSES.contains(lastResponse.getStatus())) {
-
             // WARNING: recoverable events and failures are not quite the same thing
             session.handleFailedHost(hostAndPort);
             failedAttemptCount++;
@@ -194,15 +189,15 @@ public class ResilientClient extends Client {
           }
           return lastResponse;
 
-        } catch (ClientHandlerException e) {
+        } catch (ProcessingException e) {
           Throwable cause = e;
           // loop in case one ClientHandlerException has wrapped another
           do {
             cause = cause.getCause();
-          } while (cause instanceof ClientHandlerException);
+          } while (cause instanceof ProcessingException);
 
           failedAttemptCount++;
-          lastClientHandlerException = e;
+          lastProcessingException = e;
 
           if (cause instanceof IOException) {
             operationJson
@@ -239,7 +234,7 @@ public class ResilientClient extends Client {
 
           if (currentResponse != null) {
             attempt.stop(this, currentResponse);
-          } else if (lastClientHandlerException != null) {
+          } else if (lastProcessingException != null) {
             attempt.stop(this, currentResponse);
           }
         }
@@ -254,7 +249,7 @@ public class ResilientClient extends Client {
       if (lastResponse != null) {
         status = lastResponse.getStatus();
         outcome = Integer.toString(status);
-      } else if (lastClientHandlerException != null) {
+      } else if (lastProcessingException != null) {
         outcome = "Exception";
       }
 
@@ -274,7 +269,23 @@ public class ResilientClient extends Client {
       return lastResponse;
     }
 
-    throw lastClientHandlerException;
+    throw lastProcessingException;
+  }
+
+  @Override
+  public Future<?> apply(ClientRequest request, AsyncConnectorCallback callback) {
+    // Async execution not called at all
+    return null;
+  }
+
+  @Override
+  public String getName() {
+    return this.shortName;
+  }
+
+  @Override
+  public void close() {
+    super.close();
   }
 
   private boolean isRemoteStateUncertain(final Throwable cause) {
@@ -329,7 +340,7 @@ public class ResilientClient extends Client {
   private static String _version;
 
   static {
-    InputStream mavenProperties = ResilientClient.class.getResourceAsStream(MAVEN_PROPERTIES);
+    InputStream mavenProperties = ResilientClientNew.class.getResourceAsStream(MAVEN_PROPERTIES);
     if (mavenProperties == null) {
       _version = "LOCAL";
     } else {

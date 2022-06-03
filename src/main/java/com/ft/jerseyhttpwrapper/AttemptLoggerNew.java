@@ -9,8 +9,6 @@ import com.codahale.metrics.Timer;
 import com.ft.jerseyhttpwrapper.config.validation.DeniedRegexpsValidator;
 import com.ft.membership.logging.IntermediateYield;
 import com.ft.membership.logging.Operation;
-import com.sun.jersey.api.client.ClientRequest;
-import com.sun.jersey.api.client.ClientResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,13 +21,15 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import javax.ws.rs.core.MultivaluedMap;
+import org.glassfish.jersey.client.ClientRequest;
+import org.glassfish.jersey.client.ClientResponse;
 
 /**
  * AttemptLogger
  *
- * @author Simon.Gibbs
+ * @author Georgi Kazakov
  */
-public class AttemptLogger {
+public class AttemptLoggerNew {
 
   private final String attemptUri;
   private final Timer.Context attemptTimer;
@@ -38,14 +38,14 @@ public class AttemptLogger {
 
   private DeniedRegexpsValidator deniedRegexpsValidator;
 
-  public AttemptLogger(Timer.Context attemptTimer, String uri, ClientRequest request) {
+  public AttemptLoggerNew(Timer.Context attemptTimer, String uri, ClientRequest request) {
     this.attemptTimer = attemptTimer;
     this.request = request;
     startMillis = System.currentTimeMillis();
     this.attemptUri = uri;
   }
 
-  public void stop(ResilientClient client, ClientResponse response) {
+  public void stop(ResilientClientNew client, ClientResponse response) {
     long endTime = System.currentTimeMillis();
     attemptTimer.stop();
     long timeTakenMillis = (endTime - startMillis);
@@ -68,8 +68,8 @@ public class AttemptLogger {
     withField(yield, "responsetime", timeTakenMillis);
     withField(yield, "protocol", client.getProtocol());
     withField(yield, "uri", attemptUri);
-    if (nonNull(request.getURI())) {
-      withField(yield, "path", request.getURI().getPath());
+    if (nonNull(request.getUri())) {
+      withField(yield, "path", request.getUri().getPath());
     }
     withField(yield, "method", request.getMethod());
     withField(yield, "status", status);
@@ -173,7 +173,7 @@ public class AttemptLogger {
     List<String> headerValues = new ArrayList<String>();
     if (nonNull(responseHeaders)) {
       for (String headerName : responseHeaders.keySet()) {
-        for (Object valueObject : responseHeaders.get(headerName)) {
+        for (String valueObject : responseHeaders.get(headerName)) {
           headerValues.add(valueObject.toString());
         }
         headers.put(headerName, headerValues.toString());
