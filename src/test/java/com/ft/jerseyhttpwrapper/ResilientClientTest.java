@@ -126,7 +126,7 @@ public class ResilientClientTest {
         aResponse()
             .withStatus(200)
             .withHeader(CONTENT_TYPE, "text/plain")
-            .withFixedDelay(501)
+            .withFixedDelay(505)
             .withBody("Hello world"));
 
     resource(builder.build()).get(ClientResponse.class);
