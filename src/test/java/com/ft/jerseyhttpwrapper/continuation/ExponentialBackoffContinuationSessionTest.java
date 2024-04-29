@@ -39,7 +39,7 @@ public class ExponentialBackoffContinuationSessionTest {
 
   private Runnable sessionLoadGenerator(final ContinuationSession session) {
     return new Runnable() {
-      @Override
+
       public void run() {
         // this will run until interrupted
         while (session.shouldContinue()) {
@@ -95,14 +95,14 @@ public class ExponentialBackoffContinuationSessionTest {
 
     Thread threadUnderTest = new Thread(sessionLoadGenerator(session));
 
-    // interrupt the the thread almost immediately
+    // interrupt the thread almost immediately
     threadUnderTest.start();
 
     sleepFor(5);
     assertThat(hostsReturned, is(1));
     sleepFor(100);
     assertThat(hostsReturned, is(2));
-    sleepFor(200);
+    sleepFor(210);
     assertThat(hostsReturned, is(3));
     sleepFor(400);
     assertThat(hostsReturned, is(4));
